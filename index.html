@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Odwrotna Mapa.">
+  <title>Odwrotna Mapa - mapa z południem u góry</title>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/maplibre-gl@5.24.0/dist/maplibre-gl.css">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main id="app">
+    <div id="map" aria-label="Interaktywna mapa"></div>
+
+    <section id="fatal-error" class="fatal-error" hidden>
+      <h1>Nie udało się uruchomić mapy</h1>
+      <p id="fatal-error-text"></p>
+      <p>Sprawdź połączenie z internetem i uruchom stronę przez HTTPS albo lokalny serwer.</p>
+    </section>
+
+    <header class="toolbar" aria-label="Sterowanie mapą">
+      <a class="brand" href="#" aria-label="Odwrotna Mapa">
+        <img class="brand-logo" src="assets/logo.svg" alt="">
+        <strong>Odwrotna Mapa</strong>
+      </a>
+
+      <form id="search-form" class="search" role="search">
+        <input id="search-input" type="search" autocomplete="off"
+               placeholder="Szukaj miejsca…" aria-label="Szukaj miejsca">
+        <button type="submit" id="search-button">Szukaj</button>
+      </form>
+
+      <div class="toolbar-actions">
+        <label class="select-wrap">
+          <span class="sr-only" id="theme-label">Styl mapy</span>
+          <select id="theme-select" aria-labelledby="theme-label">
+            <option value="light">Jasna</option>
+            <option value="dark">Ciemna</option>
+            <option value="satellite">Satelitarna</option>
+          </select>
+        </label>
+
+        <label class="select-wrap">
+          <span class="sr-only" id="language-label">Język</span>
+          <select id="language-select" aria-labelledby="language-label">
+            <option value="pl">PL</option>
+            <option value="en">EN</option>
+          </select>
+        </label>
+        <button id="locate-button" class="icon-button" type="button"
+                title="Moja lokalizacja" aria-label="Moja lokalizacja">◎</button>
+        <button id="legend-button" class="icon-button" type="button"
+                title="Legenda" aria-label="Legenda"
+                aria-expanded="false" aria-controls="legend-panel">i</button>
+      </div>
+    </header>
+
+    <aside id="legend-panel" class="legend-panel" aria-labelledby="legend-title" hidden>
+      <div class="legend-header">
+        <h2 id="legend-title">Legenda</h2>
+        <button id="legend-close" class="legend-close" type="button"
+                aria-label="Zamknij legendę">×</button>
+      </div>
+
+      <section class="legend-section">
+        <h3 data-legend-section="boundaries">Granice</h3>
+        <ul class="legend-list">
+          <li><span class="legend-symbol liberty-boundary-country"></span><span data-legend="countryBorder">Granica państwa</span></li>
+          <li><span class="legend-symbol liberty-boundary-admin"></span><span data-legend="adminBorder">Granica administracyjna</span></li>
+          <li><span class="legend-symbol liberty-boundary-disputed"></span><span data-legend="disputedBorder">Granica sporna</span></li>
+        </ul>
+      </section>
+
+      <section class="legend-section">
+        <h3 data-legend-section="roads">Drogi</h3>
+        <ul class="legend-list">
+          <li><span class="legend-symbol liberty-motorway"></span><span data-legend="motorway">Autostrada</span></li>
+          <li><span class="legend-symbol liberty-primary"></span><span data-legend="primaryRoad">Droga główna</span></li>
+          <li><span class="legend-symbol liberty-secondary"></span><span data-legend="secondaryRoad">Droga drugorzędna</span></li>
+          <li><span class="legend-symbol liberty-minor"></span><span data-legend="minorRoad">Droga lokalna</span></li>
+          <li><span class="legend-symbol liberty-path"></span><span data-legend="path">Ścieżka / droga piesza</span></li>
+        </ul>
+      </section>
+
+      <section class="legend-section">
+        <h3 data-legend-section="transport">Transport</h3>
+        <ul class="legend-list">
+          <li><span class="legend-symbol liberty-rail"></span><span data-legend="railway">Linia kolejowa</span></li>
+          <li><span class="legend-symbol liberty-runway"></span><span data-legend="runway">Pas startowy</span></li>
+          <li><span class="legend-symbol liberty-taxiway"></span><span data-legend="taxiway">Droga kołowania</span></li>
+        </ul>
+      </section>
+
+      <section class="legend-section">
+        <h3 data-legend-section="land">Teren</h3>
+        <ul class="legend-list">
+          <li><span class="legend-symbol liberty-water"></span><span data-legend="water">Woda</span></li>
+          <li><span class="legend-symbol liberty-park"></span><span data-legend="park">Park</span></li>
+          <li><span class="legend-symbol liberty-wood"></span><span data-legend="forest">Las</span></li>
+          <li><span class="legend-symbol liberty-grass"></span><span data-legend="grass">Teren trawiasty</span></li>
+          <li><span class="legend-symbol liberty-wetland"></span><span data-legend="wetland">Teren podmokły</span></li>
+          <li><span class="legend-symbol liberty-sand"></span><span data-legend="sand">Piasek</span></li>
+          <li><span class="legend-symbol liberty-residential"></span><span data-legend="residential">Obszar mieszkalny</span></li>
+          <li><span class="legend-symbol liberty-cemetery"></span><span data-legend="cemetery">Cmentarz</span></li>
+          <li><span class="legend-symbol liberty-hospital"></span><span data-legend="hospital">Szpital</span></li>
+          <li><span class="legend-symbol liberty-school"></span><span data-legend="school">Szkoła</span></li>
+          <li><span class="legend-symbol liberty-building"></span><span data-legend="buildings">Budynek</span></li>
+        </ul>
+      </section>
+
+      <p id="legend-note" class="legend-note">
+        Legenda oparta na stylu Liberty OpenFreeMap. Wygląd symboli i kolorów może różnić się w zależności od wybranego motywu mapy.
+      </p>
+    </aside>
+
+<div id="status" class="status" role="status" aria-live="polite" hidden></div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/maplibre-gl@5.24.0/dist/maplibre-gl.js"></script>
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
