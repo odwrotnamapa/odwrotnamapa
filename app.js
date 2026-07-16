@@ -43,9 +43,7 @@
       legendNote: "Legenda oparta na stylu Liberty OpenFreeMap. Wygląd symboli i kolorów może różnić się w zależności od wybranego motywu mapy.",
       about: "O projekcie",
       closeAbout: "Zamknij sekcję O projekcie",
-      aboutWhy: "Dlaczego południe jest u góry?",
-      aboutIntro: "Większość współczesnych map przedstawia północ na górze. Nie jest to jednak jedyny możliwy sposób przedstawiania świata. Odwrotna Mapa powstała jako próba spojrzenia na znaną mapę z innej perspektywy i zachęta do zastanowienia się nad tym, jak konwencje wpływają na nasze postrzeganie rzeczywistości.",
-      aboutDraft: "Ta sekcja jest w trakcie opracowywania. Wkrótce pojawi się tutaj pełniejszy opis idei stojącej za projektem.",
+      aboutIntro: "Większość współczesnych map przedstawia północ na górze, więc łatwo zapomnieć, że nie jest to prawo natury, lecz historyczna konwencja. Odwrotna Mapa zachęca do spojrzenia na świat z innej perspektywy — i to dosłownie — oraz przypomina, że sposób przedstawiania rzeczywistości znacząco wpływa na to, jak ją postrzegamy.",
       aboutVersion: "Wersja",
       aboutData: "Dane mapowe",
       aboutStyle: "Styl mapy",
@@ -119,9 +117,7 @@
       legendNote: "Legend based on the OpenFreeMap Liberty style. The appearance of symbols and colours may vary depending on the selected map theme.",
       about: "About",
       closeAbout: "Close the About panel",
-      aboutWhy: "Why is south at the top?",
       aboutIntro: "Most modern maps place north at the top. This is not, however, the only possible way to represent the world. Odwrotna Mapa was created as an attempt to look at a familiar map from another perspective and to encourage reflection on how conventions influence our perception of reality.",
-      aboutDraft: "This section is still being developed. A fuller explanation of the idea behind the project will appear here soon.",
       aboutVersion: "Version",
       aboutData: "Map data",
       aboutStyle: "Map style",
@@ -191,9 +187,7 @@
     aboutPanel: $("about-panel"),
     aboutClose: $("about-close"),
     aboutTitle: $("about-title"),
-    aboutWhyTitle: $("about-why-title"),
     aboutIntro: $("about-intro"),
-    aboutDraftNote: $("about-draft-note"),
     aboutVersionLabel: $("about-version-label"),
     aboutDataLabel: $("about-data-label"),
     aboutStyleLabel: $("about-style-label"),
@@ -325,9 +319,7 @@
     el.aboutButton.setAttribute("aria-label", t.about);
     el.aboutTitle.textContent = t.about;
     el.aboutClose.setAttribute("aria-label", t.closeAbout);
-    el.aboutWhyTitle.textContent = t.aboutWhy;
     el.aboutIntro.textContent = t.aboutIntro;
-    el.aboutDraftNote.textContent = t.aboutDraft;
     el.aboutVersionLabel.textContent = t.aboutVersion;
     el.aboutDataLabel.textContent = t.aboutData;
     el.aboutStyleLabel.textContent = t.aboutStyle;
