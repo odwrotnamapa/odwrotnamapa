@@ -2460,14 +2460,6 @@ function closeRoute() {
       })
     );
 
-    const osmLink = document.createElement("a");
-    osmLink.className = "place-card-action place-card-link";
-    osmLink.target = "_blank";
-    osmLink.rel = "noopener noreferrer";
-    osmLink.href = `https://www.openstreetmap.org/?mlat=${lngLat.lat}&mlon=${lngLat.lng}#map=18/${lngLat.lat}/${lngLat.lng}`;
-    osmLink.textContent = "🌍 OpenStreetMap";
-    actions.appendChild(osmLink);
-
     card.appendChild(actions);
     return card;
   }
