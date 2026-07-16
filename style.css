@@ -2739,3 +2739,47 @@ a.place-card-row {
     margin: 0 0 2px 6px !important;
   }
 }
+
+
+/* Mobilny znak logo jako część wyszukiwarki */
+.mobile-search-logo {
+  display: none;
+}
+
+@media (max-width: 600px) {
+  .toolbar {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  .toolbar > .brand {
+    display: none !important;
+  }
+
+  .toolbar .search {
+    grid-column: 1 !important;
+    width: 100%;
+  }
+
+  .mobile-search-logo {
+    display: grid;
+    place-items: center;
+    flex: 0 0 48px;
+    width: 48px;
+    min-width: 48px;
+    height: 46px;
+    border-right: 1px solid var(--border);
+    background: transparent;
+    text-decoration: none;
+  }
+
+  .mobile-search-logo img {
+    display: block;
+    width: 30px;
+    height: 30px;
+    object-fit: contain;
+  }
+
+  .search input {
+    min-width: 0;
+  }
+}
