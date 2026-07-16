@@ -92,7 +92,9 @@
       autocompleteLoading: "Szukam…",
       autocompleteError: "Nie udało się pobrać podpowiedzi.",
       autocompleteCorrected: name => `Poprawiono nazwę na: ${name}`,
-      clearSearch: "Wyczyść wyszukiwanie"
+      clearSearch: "Wyczyść wyszukiwanie",
+      searchHistory: "Ostatnie wyszukiwania",
+      clearSearchHistory: "Wyczyść historię"
     },
     en: {
       title: "Odwrotna Mapa - mapa z południem u góry",
@@ -181,7 +183,9 @@
       autocompleteLoading: "Searching…",
       autocompleteError: "Suggestions could not be loaded.",
       autocompleteCorrected: name => `Corrected to: ${name}`,
-      clearSearch: "Clear search"
+      clearSearch: "Clear search",
+      searchHistory: "Recent searches",
+      clearSearchHistory: "Clear history"
     }
   };
 
@@ -717,6 +721,51 @@
     ].includes(layerId);
   }
 
+  function getSearchHistory() {
+    try {
+      const stored = JSON.parse(
+        localStorage.getItem(CONFIG.storageKeys.searchHistory) || "[]"
+      );
+
+      if (!Array.isArray(stored)) return [];
+
+      return stored.filter(entry =>
+        entry &&
+        typeof entry.label === "string" &&
+        Number.isFinite(Number(entry.lon)) &&
+        Number.isFinite(Number(entry.lat))
+      );
+    } catch (_) {
+      return [];
+    }
+  }
+
+  function saveSearchHistoryEntry(entry) {
+    if (!entry?.label) return;
+
+    const normalized = normalizeSearchText(entry.label);
+    const history = getSearchHistory().filter(
+      item => normalizeSearchText(item.label) !== normalized
+    );
+
+    history.unshift({
+      label: entry.label,
+      displayName: entry.displayName || entry.label,
+      lon: Number(entry.lon),
+      lat: Number(entry.lat),
+      savedAt: Date.now()
+    });
+
+    localStorage.setItem(
+      CONFIG.storageKeys.searchHistory,
+      JSON.stringify(history.slice(0, 8))
+    );
+  }
+
+  function clearSearchHistory() {
+    localStorage.removeItem(CONFIG.storageKeys.searchHistory);
+  }
+
   function initializeAutocomplete() {
     const floatingList = el.autocompleteFloating;
     let activeInput = null;
@@ -853,6 +902,91 @@
       positionList();
     };
 
+    const renderHistory = () => {
+      const history = getSearchHistory();
+
+      floatingList.replaceChildren();
+      activeIndex = -1;
+
+      if (!history.length) {
+        hide();
+        return;
+      }
+
+      const header = document.createElement("li");
+      header.className = "autocomplete-history-header";
+
+      const title = document.createElement("span");
+      title.textContent = text[state.language].searchHistory;
+
+      const clearButton = document.createElement("button");
+      clearButton.type = "button";
+      clearButton.className = "autocomplete-history-clear";
+      clearButton.textContent = text[state.language].clearSearchHistory;
+      clearButton.addEventListener("click", event => {
+        event.stopPropagation();
+        clearSearchHistory();
+        hide();
+      });
+
+      header.append(title, clearButton);
+      floatingList.appendChild(header);
+
+      const fragment = document.createDocumentFragment();
+
+      history.forEach(entry => {
+        const item = document.createElement("li");
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "autocomplete-option autocomplete-history-option";
+
+        const icon = document.createElement("span");
+        icon.className = "autocomplete-history-icon";
+        icon.setAttribute("aria-hidden", "true");
+        icon.textContent = "↺";
+
+        const copy = document.createElement("span");
+        copy.className = "autocomplete-history-copy";
+
+        const label = document.createElement("strong");
+        label.textContent = entry.label;
+
+        const details = document.createElement("span");
+        details.textContent = entry.displayName || entry.label;
+
+        copy.append(label, details);
+        button.append(icon, copy);
+
+        button.addEventListener("pointerdown", event => {
+          event.preventDefault();
+        });
+
+        button.addEventListener("click", () => {
+          el.searchInput.value = entry.label;
+          updateSearchClearButton();
+          hide();
+
+          map.flyTo({
+            center: [entry.lon, entry.lat],
+            zoom: 12,
+            bearing: 180
+          });
+
+          new maplibregl.Popup()
+            .setLngLat([entry.lon, entry.lat])
+            .setText(entry.displayName || entry.label)
+            .addTo(map);
+        });
+
+        item.appendChild(button);
+        fragment.appendChild(item);
+      });
+
+      floatingList.appendChild(fragment);
+      floatingList.hidden = false;
+      positionList();
+    };
+
     const fetchSuggestions = async query => {
       abortController?.abort();
       abortController = new AbortController();
@@ -927,7 +1061,11 @@
         activeSelect = onSelect;
 
         if (query.length < 2) {
-          hide();
+          if (input === el.searchInput && !query) {
+            renderHistory();
+          } else {
+            hide();
+          }
           return;
         }
 
@@ -939,7 +1077,15 @@
       input.addEventListener("focus", () => {
         activeInput = input;
         activeSelect = onSelect;
-        if (results.length && !floatingList.hidden) positionList();
+
+        if (input === el.searchInput && !input.value.trim()) {
+          renderHistory();
+          return;
+        }
+
+        if (results.length && !floatingList.hidden) {
+          positionList();
+        }
       });
 
       input.addEventListener("keydown", event => {
@@ -2501,6 +2647,7 @@
     hideAllAutocomplete();
     updateSearchClearButton();
     el.searchInput.focus();
+    el.searchInput.dispatchEvent(new Event("focus"));
   }
 
   async function search(event) {
@@ -2522,6 +2669,12 @@
         el.searchInput.value = correctedName;
         updateSearchClearButton();
       }
+      saveSearchHistoryEntry({
+        label: correctedName || getPreferredPlaceLabel(result),
+        displayName: result.display_name || getPreferredPlaceLabel(result),
+        lon: Number(result.lon),
+        lat: Number(result.lat)
+      });
 
       const point = [Number(result.lon), Number(result.lat)];
       map.flyTo({ center: point, zoom: 12, bearing: 180 });

@@ -1466,3 +1466,44 @@ body.ui-dark .legend-symbol.osm-buildings {
   border-left:none !important;
   box-shadow:none !important;
 }
+
+
+.autocomplete-history-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 6px 8px 4px;
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 750;
+}
+
+.autocomplete-history-clear {
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  cursor: pointer;
+}
+
+.autocomplete-history-clear:hover,
+.autocomplete-history-clear:focus-visible {
+  color: var(--text);
+}
+
+.autocomplete-history-option {
+  grid-template-columns: 24px minmax(0, 1fr);
+  align-items: center;
+}
+
+.autocomplete-history-icon {
+  display: grid;
+  place-items: center;
+  color: var(--muted);
+  font-size: 1rem;
+}
+
+.autocomplete-history-copy {
+  min-width: 0;
+}

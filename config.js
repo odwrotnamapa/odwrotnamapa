@@ -35,6 +35,7 @@ window.SOUTHMAPS_CONFIG = Object.freeze({
   storageKeys: {
     language: "odwrotnamapa.language",
     theme: "odwrotnamapa.theme",
-    view: "odwrotnamapa.view"
+    view: "odwrotnamapa.view",
+    searchHistory: "odwrotnamapa.searchHistory"
   }
 });
