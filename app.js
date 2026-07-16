@@ -322,7 +322,11 @@
     legendPanel: $("legend-panel"),
     legendClose: $("legend-close"),
     menuButton: $("menu-button"),
+    mobileRouteButton: $("mobile-route-button"),
+    mobileDiscoverButton: $("mobile-discover-button"),
+    mobileMenuButton: $("mobile-menu-button"),
     menuPanel: $("menu-panel"),
+    menuSheetHandle: $("menu-sheet-handle"),
     menuClose: $("menu-close"),
     menuTitle: $("menu-title"),
     menuLocationButton: $("menu-location-button"),
@@ -485,6 +489,9 @@
   el.aboutButton?.addEventListener("click", toggleAbout);
   el.aboutClose?.addEventListener("click", closeAbout);
   el.routeButton?.addEventListener("click", toggleRoute);
+  el.mobileRouteButton?.addEventListener("click", toggleRoute);
+  el.mobileDiscoverButton?.addEventListener("click", toggleDiscover);
+  el.mobileMenuButton?.addEventListener("click", toggleMenu);
   el.discoverButton?.addEventListener("click", toggleDiscover);
   el.discoverClose?.addEventListener("click", closeDiscover);
   el.discoverClear?.addEventListener("click", clearDiscoverResults);
@@ -507,6 +514,7 @@
   }
   initializeRouteBottomSheet();
   initializeDiscoverBottomSheet();
+  initializeMenuBottomSheet();
   initializeAutocomplete();
   document.addEventListener("keydown", event => {
     if (event.key === "Escape") {
@@ -523,6 +531,18 @@
 
   function updateUI() {
     const t = text[state.language];
+    el.mobileRouteButton?.setAttribute("aria-label", t.route);
+    if (el.mobileRouteButton?.lastElementChild) {
+      el.mobileRouteButton.lastElementChild.textContent = t.routeTitle;
+    }
+    el.mobileDiscoverButton?.setAttribute("aria-label", t.discoverTitle);
+    if (el.mobileDiscoverButton?.lastElementChild) {
+      el.mobileDiscoverButton.lastElementChild.textContent = t.discoverTitle;
+    }
+    el.mobileMenuButton?.setAttribute("aria-label", t.menuTitle);
+    if (el.mobileMenuButton?.lastElementChild) {
+      el.mobileMenuButton.lastElementChild.textContent = t.menuTitle;
+    }
     document.documentElement.lang = state.language;
     document.title = t.title;
     if (el.searchInput) el.searchInput.placeholder = t.search;
@@ -2148,6 +2168,16 @@
       cssVariable: "--discover-sheet-height"
     });
   }
+
+  function initializeMenuBottomSheet() {
+    initializeBottomSheet({
+      panel: el.menuPanel,
+      handle: el.menuSheetHandle,
+      close: closeMenu,
+      cssVariable: "--menu-sheet-height"
+    });
+  }
+
 
 
 
@@ -4315,6 +4345,7 @@ function closeRoute() {
 
     el.menuPanel.hidden = !shouldOpen;
     el.menuButton.setAttribute("aria-expanded", String(shouldOpen));
+    el.mobileMenuButton?.classList.toggle("is-active", shouldOpen);
   }
 
   function closeMenu() {

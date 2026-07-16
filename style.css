@@ -2436,3 +2436,239 @@ a.place-card-row {
 #menu-button:hover{
   background:rgba(127,127,127,.12);
 }
+
+
+/* Mobilny dolny pasek głównych funkcji */
+.mobile-bottom-nav {
+  display: none;
+}
+
+@media (max-width: 600px) {
+  .toolbar {
+    grid-template-columns: auto minmax(0, 1fr) !important;
+    gap: 8px;
+    align-items: stretch;
+  }
+
+  .toolbar .brand {
+    grid-column: 1;
+  }
+
+  .toolbar .search {
+    grid-column: 2;
+    width: 100%;
+  }
+
+  .toolbar .toolbar-actions,
+  .toolbar .search #route-button,
+  .toolbar .search #discover-button {
+    display: none !important;
+  }
+
+  .mobile-bottom-nav {
+    position: fixed;
+    z-index: 30;
+    right: 8px;
+    bottom: 8px;
+    left: 8px;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    min-height: 58px;
+    border: 1px solid var(--border);
+    background: var(--panel);
+    box-shadow: var(--shadow);
+    backdrop-filter: blur(12px);
+  }
+
+  .mobile-bottom-action {
+    display: grid;
+    grid-template-rows: auto auto;
+    place-items: center;
+    gap: 2px;
+    min-width: 0;
+    min-height: 58px;
+    padding: 5px 8px;
+    border: 0;
+    border-right: 1px solid var(--border);
+    border-radius: 0;
+    background: transparent;
+    color: var(--text);
+    font: inherit;
+    cursor: pointer;
+  }
+
+  .mobile-bottom-action:last-child {
+    border-right: 0;
+  }
+
+  .mobile-bottom-action > span:first-child {
+    font-size: 1.25rem;
+    line-height: 1;
+  }
+
+  .mobile-bottom-action > span:last-child {
+    font-size: 0.68rem;
+    font-weight: 750;
+  }
+
+  .mobile-bottom-action:hover,
+  .mobile-bottom-action:focus-visible,
+  .mobile-bottom-action.is-active {
+    color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 11%, transparent);
+  }
+
+  body {
+    padding-bottom: 74px;
+  }
+
+  .maplibregl-ctrl-bottom-left,
+  .maplibregl-ctrl-bottom-right {
+    bottom: 78px;
+  }
+}
+
+@media (max-width: 430px) {
+  .toolbar {
+    grid-template-columns: 1fr !important;
+  }
+
+  .toolbar .brand,
+  .toolbar .search {
+    grid-column: 1;
+  }
+
+  .toolbar .brand {
+    justify-self: start;
+  }
+}
+
+
+/* Na telefonach ukryj kontrolki i atrybucję mapy */
+@media (max-width: 600px) {
+  .maplibregl-ctrl-top-left,
+  .maplibregl-ctrl-top-right,
+  .maplibregl-ctrl-bottom-left,
+  .maplibregl-ctrl-bottom-right,
+  .maplibregl-ctrl-attrib,
+  .maplibregl-ctrl-scale,
+  .maplibregl-ctrl-group {
+    display: none !important;
+  }
+}
+
+
+/* Menu: ten sam mobilny bottom sheet co Trasa i Odkrywaj */
+.menu-sheet-handle {
+  display: none;
+}
+
+@media (max-width: 600px) {
+  .menu-panel {
+    --menu-sheet-height: 42vh;
+    position: absolute;
+    top: auto !important;
+    right: 8px !important;
+    bottom: 74px !important;
+    left: 8px !important;
+    width: auto !important;
+    height: var(--menu-sheet-height);
+    max-height: calc(100vh - 90px) !important;
+    min-height: 48px;
+    padding: 0 14px 14px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    border-radius: 20px;
+    touch-action: pan-y;
+    transition: height 220ms ease;
+  }
+
+  .menu-panel.is-dragging {
+    transition: none;
+    user-select: none;
+  }
+
+  .menu-sheet-handle {
+    position: sticky;
+    top: 0;
+    z-index: 4;
+    display: grid;
+    place-items: center;
+    width: 100%;
+    height: 28px;
+    margin: 0;
+    border: 0;
+    background: var(--panel);
+    cursor: grab;
+    touch-action: none;
+  }
+
+  .menu-sheet-handle:active {
+    cursor: grabbing;
+  }
+
+  .menu-sheet-handle span {
+    display: block;
+    width: 44px;
+    height: 5px;
+    border-radius: 999px;
+    background:
+      color-mix(in srgb, var(--text) 35%, transparent);
+  }
+
+  .menu-panel .legend-header {
+    position: sticky;
+    top: 28px;
+    z-index: 3;
+    margin: 0 -14px 12px;
+    padding: 9px 14px 10px;
+    background: var(--panel);
+    border-bottom: 1px solid var(--border);
+    backdrop-filter: blur(12px);
+  }
+
+  .menu-panel.is-collapsed {
+    padding-bottom: 0;
+    overflow: hidden;
+  }
+
+  .menu-panel.is-collapsed .legend-header,
+  .menu-panel.is-collapsed .menu-actions {
+    display: none;
+  }
+
+  .menu-panel.is-collapsed .menu-sheet-handle {
+    height: 48px;
+  }
+
+  .menu-panel.is-collapsed .menu-sheet-handle span {
+    width: 52px;
+  }
+}
+
+
+/* Na telefonach skala jest widoczna tylko przy zamkniętych panelach */
+@media (max-width: 600px) {
+  .maplibregl-ctrl-bottom-left {
+    display: block !important;
+    bottom: 78px !important;
+  }
+
+  .maplibregl-ctrl-bottom-left .maplibregl-ctrl-scale {
+    display: block !important;
+  }
+
+  .maplibregl-ctrl-bottom-left
+  > :not(.maplibregl-ctrl-scale) {
+    display: none !important;
+  }
+
+  body:has(.route-panel:not([hidden]))
+  .maplibregl-ctrl-bottom-left,
+  body:has(.discover-panel:not([hidden]))
+  .maplibregl-ctrl-bottom-left,
+  body:has(.menu-panel:not([hidden]))
+  .maplibregl-ctrl-bottom-left {
+    display: none !important;
+  }
+}

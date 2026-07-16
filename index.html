@@ -316,6 +316,12 @@
 
     <aside id="menu-panel" class="legend-panel menu-panel"
            aria-labelledby="menu-title" hidden>
+      <button id="menu-sheet-handle"
+              class="route-sheet-handle menu-sheet-handle"
+              type="button"
+              aria-label="Zmień wysokość menu">
+        <span aria-hidden="true"></span>
+      </button>
       <div class="legend-header">
         <h2 id="menu-title">Menu</h2>
         <button id="menu-close" class="legend-close" type="button"
@@ -358,6 +364,24 @@
         </button>
       </div>
     </aside>
+
+
+    
+    <nav id="mobile-bottom-nav" class="mobile-bottom-nav"
+         aria-label="Główne funkcje mapy">
+      <button id="mobile-route-button" class="mobile-bottom-action" type="button">
+        <span aria-hidden="true">🧭</span>
+        <span>Trasa</span>
+      </button>
+      <button id="mobile-discover-button" class="mobile-bottom-action" type="button">
+        <span aria-hidden="true">📍</span>
+        <span>Odkrywaj</span>
+      </button>
+      <button id="mobile-menu-button" class="mobile-bottom-action" type="button">
+        <span aria-hidden="true">☰</span>
+        <span>Menu</span>
+      </button>
+    </nav>
 
 
     <div id="status" class="status" role="status" aria-live="polite" hidden></div>
