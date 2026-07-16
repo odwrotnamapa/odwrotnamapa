@@ -616,6 +616,14 @@ body.ui-dark .legend-symbol.osm-buildings {
   line-height: 1.35;
 }
 
+.about-draft-note {
+  padding: 11px 12px;
+  border-left: 3px solid var(--accent);
+  border-radius: 0 9px 9px 0;
+  background: rgba(127, 127, 127, 0.09);
+  color: var(--muted);
+  font-style: italic;
+}
 
 .about-meta {
   display: grid;
@@ -816,7 +824,7 @@ body.ui-dark .legend-symbol.osm-buildings {
   grid-template-columns: auto 1fr;
   gap: 6px;
   align-items: center;
-  min-height: 38px;
+  min-height: 52px;
   padding: 0 9px;
   border: 1px solid var(--border);
   border-radius: 10px;
@@ -875,7 +883,7 @@ body.ui-dark .legend-symbol.osm-buildings {
 }
 
 .route-mode-emoji{
-  font-size:1.3rem;
+  font-size:1.9rem;
   line-height:1;
 }
 
@@ -940,4 +948,63 @@ body.ui-dark .legend-symbol.osm-buildings {
     width: 34px;
     height: 34px;
   }
+}
+
+
+.route-click-hint {
+  margin: 0 0 13px;
+  padding: 10px 12px;
+  border-left: 3px solid var(--accent);
+  border-radius: 0 9px 9px 0;
+  background: rgba(127, 127, 127, 0.09);
+  color: var(--text);
+  font-size: 0.82rem;
+  line-height: 1.4;
+}
+
+.route-click-hint.is-complete {
+  color: var(--muted);
+  border-left-color: var(--muted);
+}
+
+.map-picking-route .maplibregl-canvas {
+  cursor: crosshair;
+}
+
+.route-letter-marker {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border: 3px solid #ffffff;
+  border-radius: 50% 50% 50% 0;
+  color: #ffffff;
+  font-family: var(--font);
+  font-size: 0.82rem;
+  font-weight: 850;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.34);
+  transform: rotate(-45deg);
+}
+
+.route-letter-marker > span {
+  transform: rotate(45deg);
+}
+
+.route-letter-marker.route-a {
+  background: #16a34a;
+}
+
+.route-letter-marker.route-b {
+  background: #dc2626;
+}
+
+
+/* Większe ikony środków transportu */
+.route-mode-emoji{
+  font-size:2.4rem !important;
+  line-height:1;
+}
+
+.route-modes label{
+  min-height:60px !important;
 }

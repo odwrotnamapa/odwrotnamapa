@@ -43,7 +43,9 @@
       legendNote: "Legenda oparta na stylu Liberty OpenFreeMap. Wygląd symboli i kolorów może różnić się w zależności od wybranego motywu mapy.",
       about: "O projekcie",
       closeAbout: "Zamknij sekcję O projekcie",
-      aboutIntro: "Większość współczesnych map przedstawia północ na górze, więc łatwo zapomnieć, że nie jest to prawo natury, lecz historyczna konwencja. Odwrotna Mapa zachęca do spojrzenia na świat z innej perspektywy — i to dosłownie — oraz przypomina, że sposób przedstawiania rzeczywistości znacząco wpływa na to, jak ją postrzegamy.",
+      aboutWhy: "Dlaczego południe jest u góry?",
+      aboutIntro: "Większość współczesnych map przedstawia północ na górze. Nie jest to jednak jedyny możliwy sposób przedstawiania świata. Odwrotna Mapa powstała jako próba spojrzenia na znaną mapę z innej perspektywy i zachęta do zastanowienia się nad tym, jak konwencje wpływają na nasze postrzeganie rzeczywistości.",
+      aboutDraft: "Ta sekcja jest w trakcie opracowywania. Wkrótce pojawi się tutaj pełniejszy opis idei stojącej za projektem.",
       aboutVersion: "Wersja",
       aboutData: "Dane mapowe",
       aboutStyle: "Styl mapy",
@@ -73,7 +75,11 @@
       },
       routeSearching: "Wyszukiwanie punktów i obliczanie trasy…",
       routePointNotFound: "Nie znaleziono jednego z podanych punktów.",
-      routeError: "Nie udało się wyznaczyć trasy."
+      routeError: "Nie udało się wyznaczyć trasy.",
+      routePickA: "Kliknij na mapie, aby wybrać punkt początkowy.",
+      routePickB: "Kliknij na mapie, aby wybrać punkt docelowy.",
+      routePickMoveB: "Kliknij na mapie, aby zmienić punkt docelowy.",
+      routeReverseError: "Nie udało się odczytać nazwy wybranego miejsca."
     },
     en: {
       title: "Odwrotna Mapa - mapa z południem u góry",
@@ -113,7 +119,9 @@
       legendNote: "Legend based on the OpenFreeMap Liberty style. The appearance of symbols and colours may vary depending on the selected map theme.",
       about: "About",
       closeAbout: "Close the About panel",
-      aboutIntro: "Most modern maps place north at the top, so it is easy to forget that this is not a law of nature, but a historical convention. Odwrotna Mapa encourages us to look at the world from a different perspective — quite literally — and reminds us that the way reality is represented significantly affects how we perceive it.",
+      aboutWhy: "Why is south at the top?",
+      aboutIntro: "Most modern maps place north at the top. This is not, however, the only possible way to represent the world. Odwrotna Mapa was created as an attempt to look at a familiar map from another perspective and to encourage reflection on how conventions influence our perception of reality.",
+      aboutDraft: "This section is still being developed. A fuller explanation of the idea behind the project will appear here soon.",
       aboutVersion: "Version",
       aboutData: "Map data",
       aboutStyle: "Map style",
@@ -143,7 +151,11 @@
       },
       routeSearching: "Finding points and calculating the route…",
       routePointNotFound: "One of the entered points could not be found.",
-      routeError: "The route could not be calculated."
+      routeError: "The route could not be calculated.",
+      routePickA: "Click the map to choose the starting point.",
+      routePickB: "Click the map to choose the destination.",
+      routePickMoveB: "Click the map to move the destination.",
+      routeReverseError: "The selected place name could not be read."
     }
   };
 
@@ -158,8 +170,12 @@
     originalPaint: new Map(),
     originalTextFields: new Map(),
     originalFillPatterns: new Map(),
-    routeMarkers: [],
-    routeCoordinates: null
+    routeMarkers: { a: null, b: null },
+    routeCoordinates: null,
+    routePointA: null,
+    routePointB: null,
+    routeClickStage: "a",
+    routeClickBusy: false
   };
 
   const el = {
@@ -175,7 +191,9 @@
     aboutPanel: $("about-panel"),
     aboutClose: $("about-close"),
     aboutTitle: $("about-title"),
+    aboutWhyTitle: $("about-why-title"),
     aboutIntro: $("about-intro"),
+    aboutDraftNote: $("about-draft-note"),
     aboutVersionLabel: $("about-version-label"),
     aboutDataLabel: $("about-data-label"),
     aboutStyleLabel: $("about-style-label"),
@@ -199,6 +217,7 @@
     routeDurationLabel: $("route-duration-label"),
     routeNote: $("route-note"),
     routeModeLabel: $("route-mode-label"),
+    routeClickHint: $("route-click-hint"),
     legendTitle: $("legend-title"),
     legendNote: $("legend-note"),
     status: $("status"),
@@ -250,6 +269,7 @@
   });
 
   map.on("moveend", saveView);
+  map.on("click", handleRouteMapClick);
 
   el.themeSelect.value = state.theme;
   el.languageSelect.value = state.language;
@@ -288,20 +308,6 @@
   });
   el.searchForm.addEventListener("submit", search);
 
-  function setAboutParagraph(element, content) {
-    const parts = content.split("Odwrotna Mapa");
-    element.replaceChildren();
-
-    parts.forEach((part, index) => {
-      if (index > 0) {
-        const strong = document.createElement("strong");
-        strong.textContent = "Odwrotna Mapa";
-        element.appendChild(strong);
-      }
-      element.appendChild(document.createTextNode(part));
-    });
-  }
-
   function updateUI() {
     const t = text[state.language];
     document.documentElement.lang = state.language;
@@ -319,7 +325,9 @@
     el.aboutButton.setAttribute("aria-label", t.about);
     el.aboutTitle.textContent = t.about;
     el.aboutClose.setAttribute("aria-label", t.closeAbout);
-    setAboutParagraph(el.aboutIntro, t.aboutIntro);
+    el.aboutWhyTitle.textContent = t.aboutWhy;
+    el.aboutIntro.textContent = t.aboutIntro;
+    el.aboutDraftNote.textContent = t.aboutDraft;
     el.aboutVersionLabel.textContent = t.aboutVersion;
     el.aboutDataLabel.textContent = t.aboutData;
     el.aboutStyleLabel.textContent = t.aboutStyle;
@@ -339,6 +347,7 @@
     el.routeDistanceLabel.textContent = t.routeDistance;
     el.routeDurationLabel.textContent = t.routeDuration;
     el.routeNote.textContent = t.routeNote;
+    updateRouteClickHint();
     el.routeModeLabel.textContent = t.routeMode;
     for (const modeLabel of document.querySelectorAll("[data-route-mode-label]")) {
       modeLabel.textContent = t.routeModes[modeLabel.dataset.routeModeLabel];
@@ -656,18 +665,191 @@
     closeAbout();
     el.routePanel.hidden = !shouldOpen;
     el.routeButton.setAttribute("aria-expanded", String(shouldOpen));
+
+    if (shouldOpen) {
+      state.routeClickStage = state.routePointA
+        ? (state.routePointB ? "move-b" : "b")
+        : "a";
+      document.body.classList.add("map-picking-route");
+      updateRouteClickHint();
+    } else {
+      document.body.classList.remove("map-picking-route");
+    }
   }
 
   function closeRoute() {
     if (el.routePanel.hidden) return;
     el.routePanel.hidden = true;
     el.routeButton.setAttribute("aria-expanded", "false");
+    document.body.classList.remove("map-picking-route");
   }
 
   function swapRoutePoints() {
     const value = el.routeFrom.value;
     el.routeFrom.value = el.routeTo.value;
     el.routeTo.value = value;
+
+    const point = state.routePointA;
+    state.routePointA = state.routePointB;
+    state.routePointB = point;
+
+    refreshRouteMarkers();
+
+    if (state.routePointA && state.routePointB) {
+      calculateRouteFromStoredPoints();
+    }
+
+    state.routeClickStage = state.routePointA
+      ? (state.routePointB ? "move-b" : "b")
+      : "a";
+    updateRouteClickHint();
+  }
+
+  async function handleRouteMapClick(event) {
+    if (el.routePanel.hidden || state.routeClickBusy) return;
+
+    state.routeClickBusy = true;
+    const point = {
+      lon: event.lngLat.lng,
+      lat: event.lngLat.lat,
+      label: formatCoordinates(event.lngLat.lng, event.lngLat.lat)
+    };
+
+    try {
+      point.label = await reverseGeocodeRoutePoint(point);
+    } catch (error) {
+      console.error(error);
+      show(text[state.language].routeReverseError);
+    }
+
+    if (state.routeClickStage === "a") {
+      state.routePointA = point;
+      el.routeFrom.value = point.label;
+      setRouteMarker("a", point);
+      state.routeClickStage = "b";
+      updateRouteClickHint();
+      state.routeClickBusy = false;
+      return;
+    }
+
+    state.routePointB = point;
+    el.routeTo.value = point.label;
+    setRouteMarker("b", point);
+    state.routeClickStage = "move-b";
+    updateRouteClickHint();
+
+    if (state.routePointA) {
+      await calculateRouteFromStoredPoints();
+    }
+
+    state.routeClickBusy = false;
+  }
+
+  async function calculateRouteFromStoredPoints() {
+    if (!state.routePointA || !state.routePointB) return;
+
+    show(text[state.language].routeSearching, 0);
+    el.routeSubmit.disabled = true;
+
+    try {
+      const route = await fetchRoute(state.routePointA, state.routePointB);
+      drawRoute(
+        route.geometry,
+        state.routePointA,
+        state.routePointB,
+        getSelectedRouteMode()
+      );
+      updateRouteSummary(route.distance, route.duration);
+      hide();
+    } catch (error) {
+      console.error(error);
+      show(text[state.language].routeError);
+    } finally {
+      el.routeSubmit.disabled = false;
+    }
+  }
+
+  async function reverseGeocodeRoutePoint(point) {
+    const url = new URL(CONFIG.search.reverseEndpoint);
+    url.searchParams.set("lat", String(point.lat));
+    url.searchParams.set("lon", String(point.lon));
+    url.searchParams.set("format", "jsonv2");
+    url.searchParams.set("accept-language", state.language);
+    url.searchParams.set("zoom", "18");
+
+    const response = await fetch(url, {
+      headers: { "Accept": "application/json" }
+    });
+    if (!response.ok) {
+      throw new Error(`Nominatim reverse HTTP ${response.status}`);
+    }
+
+    const result = await response.json();
+    return result.display_name || formatCoordinates(point.lon, point.lat);
+  }
+
+  function formatCoordinates(lon, lat) {
+    return `${lat.toFixed(5)}, ${lon.toFixed(5)}`;
+  }
+
+  function updateRouteClickHint() {
+    if (!el.routeClickHint) return;
+    const t = text[state.language];
+
+    if (state.routeClickStage === "a") {
+      el.routeClickHint.textContent = t.routePickA;
+      el.routeClickHint.classList.remove("is-complete");
+    } else if (state.routeClickStage === "b") {
+      el.routeClickHint.textContent = t.routePickB;
+      el.routeClickHint.classList.remove("is-complete");
+    } else {
+      el.routeClickHint.textContent = t.routePickMoveB;
+      el.routeClickHint.classList.add("is-complete");
+    }
+  }
+
+  function createRouteMarkerElement(letter, markerClass) {
+    const element = document.createElement("div");
+    element.className = `route-letter-marker ${markerClass}`;
+
+    const label = document.createElement("span");
+    label.textContent = letter;
+    element.appendChild(label);
+
+    return element;
+  }
+
+  function setRouteMarker(key, point) {
+    removeRouteMarker(key);
+
+    const isA = key === "a";
+    const marker = new maplibregl.Marker({
+      element: createRouteMarkerElement(
+        isA ? "A" : "B",
+        isA ? "route-a" : "route-b"
+      ),
+      anchor: "bottom"
+    })
+      .setLngLat([point.lon, point.lat])
+      .setPopup(new maplibregl.Popup().setText(point.label))
+      .addTo(map);
+
+    state.routeMarkers[key] = marker;
+  }
+
+  function removeRouteMarker(key) {
+    if (state.routeMarkers[key]) {
+      state.routeMarkers[key].remove();
+      state.routeMarkers[key] = null;
+    }
+  }
+
+  function refreshRouteMarkers() {
+    if (state.routePointA) setRouteMarker("a", state.routePointA);
+    else removeRouteMarker("a");
+
+    if (state.routePointB) setRouteMarker("b", state.routePointB);
+    else removeRouteMarker("b");
   }
 
   async function planRoute(event) {
@@ -690,8 +872,13 @@
         return;
       }
 
+      state.routePointA = from;
+      state.routePointB = to;
+      state.routeClickStage = "move-b";
+
       const route = await fetchRoute(from, to);
       drawRoute(route.geometry, from, to, getSelectedRouteMode());
+      updateRouteClickHint();
       updateRouteSummary(route.distance, route.duration);
       hide();
     } catch (error) {
@@ -896,17 +1083,9 @@
       routeColors[mode] || routeColors.auto
     );
 
-    for (const marker of state.routeMarkers) marker.remove();
-    state.routeMarkers = [
-      new maplibregl.Marker({ color: "#16a34a" })
-        .setLngLat([from.lon, from.lat])
-        .setPopup(new maplibregl.Popup().setText(from.label))
-        .addTo(map),
-      new maplibregl.Marker({ color: "#dc2626" })
-        .setLngLat([to.lon, to.lat])
-        .setPopup(new maplibregl.Popup().setText(to.label))
-        .addTo(map)
-    ];
+    state.routePointA = from;
+    state.routePointB = to;
+    refreshRouteMarkers();
 
     const bounds = geometry.coordinates.reduce(
       (current, coordinate) => current.extend(coordinate),
@@ -947,6 +1126,9 @@
 
   function clearRoute() {
     state.routeCoordinates = null;
+    state.routePointA = null;
+    state.routePointB = null;
+    state.routeClickStage = "a";
     el.routeSummary.hidden = true;
     el.routeDistance.textContent = "—";
     el.routeDuration.textContent = "—";
@@ -966,8 +1148,9 @@
       map.setLayoutProperty(CONFIG.routing.lineLayerId, "visibility", "none");
     }
 
-    for (const marker of state.routeMarkers) marker.remove();
-    state.routeMarkers = [];
+    removeRouteMarker("a");
+    removeRouteMarker("b");
+    updateRouteClickHint();
   }
 
   function toggleAbout() {
