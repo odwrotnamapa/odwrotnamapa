@@ -1019,7 +1019,7 @@ body.ui-dark .legend-symbol.osm-buildings {
     bottom: 8px;
     left: 8px;
     width: auto !important;
-    max-height: min(62vh, 520px) !important;
+    max-height: 40vh !important;
     padding: 14px;
     overflow-y: auto;
     overscroll-behavior: contain;
@@ -1038,9 +1038,7 @@ body.ui-dark .legend-symbol.osm-buildings {
   }
 
   .route-click-hint {
-    margin-bottom: 10px;
-    padding: 8px 10px;
-    font-size: 0.78rem;
+    display: none;
   }
 
   .route-modes label {
@@ -1073,17 +1071,17 @@ body.ui-dark .legend-symbol.osm-buildings {
 
   /* Zostaw widoczny fragment mapy nad panelem */
   .maplibregl-ctrl-bottom-right {
-    bottom: calc(min(62vh, 520px) + 18px);
+    bottom: calc(40vh + 18px);
   }
 
   .maplibregl-ctrl-bottom-left {
-    bottom: calc(min(62vh, 520px) + 18px);
+    bottom: calc(40vh + 18px);
   }
 }
 
 @media (max-width: 390px), (max-height: 700px) {
   .route-panel {
-    max-height: 56vh !important;
+    max-height: 45vh !important;
   }
 
   .route-mode-emoji {
@@ -1101,6 +1099,6 @@ body.ui-dark .legend-symbol.osm-buildings {
 
   .maplibregl-ctrl-bottom-right,
   .maplibregl-ctrl-bottom-left {
-    bottom: calc(56vh + 18px);
+    bottom: calc(45vh + 18px);
   }
 }
