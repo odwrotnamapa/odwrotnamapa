@@ -1836,3 +1836,45 @@ body.ui-dark .legend-symbol.osm-buildings {
     max-height: 205px;
   }
 }
+
+
+.autocomplete-option {
+  display: grid;
+  grid-template-columns: 30px minmax(0, 1fr);
+  gap: 8px;
+  align-items: center;
+}
+
+.autocomplete-place-icon {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  background: rgba(127, 127, 127, 0.08);
+  font-size: 1.05rem;
+}
+
+.autocomplete-place-copy {
+  min-width: 0;
+}
+
+.autocomplete-place-copy strong,
+.autocomplete-place-copy span {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.autocomplete-place-copy strong {
+  font-size: 0.84rem;
+  line-height: 1.35;
+}
+
+.autocomplete-place-copy span {
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 0.7rem;
+  line-height: 1.3;
+}
