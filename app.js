@@ -437,6 +437,9 @@
   map.on("moveend", saveView);
   map.on("click", handleMapClick);
   map.on("contextmenu", event => {
+    const hasMouse = window.matchMedia("(pointer: fine)").matches;
+    if (!hasMouse) return;
+
     event.preventDefault();
     closeActiveOverlay();
   });
