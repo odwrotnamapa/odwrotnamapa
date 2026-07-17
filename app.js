@@ -350,6 +350,9 @@
     contextPointMarker: null,
     userLocationMarker: null,
     contextMenuLngLat: null,
+    mapLongPressTimer: null,
+    mapLongPressStartPoint: null,
+    mapLongPressTriggered: false,
     placeRequestController: null,
     exploreMarkers: [],
     exploreRequestController: null,
@@ -510,7 +513,13 @@
   map.on("moveend", saveView);
   map.on("click", handleMapClick);
   map.on("contextmenu", openMapContextMenu);
-  map.on("movestart", closeMapContextMenu);
+  map.on("touchstart", handleMapLongPressStart);
+  map.on("touchmove", handleMapLongPressMove);
+  map.on("touchend", handleMapLongPressEnd);
+  map.on("movestart", () => {
+    cancelMapLongPress();
+    closeMapContextMenu();
+  });
 
   el.themeSelect.value = state.theme;
   el.languageSelect.value = state.language;
@@ -2438,7 +2447,12 @@
     closeRoute();
 
     el.discoverPanel.hidden = !shouldOpen;
-    el.discoverButton?.setAttribute(
+    
+    el.discoverButton?.setAttribute("aria-expanded", String(shouldOpen));
+    el.discoverButton?.classList.toggle("is-active", shouldOpen);
+    el.mobileDiscoverButton?.setAttribute("aria-expanded", String(shouldOpen));
+    el.mobileDiscoverButton?.classList.toggle("is-active", shouldOpen);
+el.discoverButton?.setAttribute(
       "aria-expanded",
       String(shouldOpen)
     );
@@ -2449,7 +2463,9 @@
 
     el.discoverPanel.hidden = true;
     el.discoverButton?.setAttribute("aria-expanded", "false");
-    el.discoverButton.classList.remove("is-active");
+    el.discoverButton?.classList.remove("is-active");
+    el.mobileDiscoverButton?.setAttribute("aria-expanded", "false");
+    el.mobileDiscoverButton?.classList.remove("is-active");
   }
 
   function toggleRoute() {
@@ -2463,7 +2479,12 @@
     closeLegend();
     closeAbout();
     el.routePanel.hidden = !shouldOpen;
+    
     el.routeButton?.setAttribute("aria-expanded", String(shouldOpen));
+    el.routeButton?.classList.toggle("is-active", shouldOpen);
+    el.mobileRouteButton?.setAttribute("aria-expanded", String(shouldOpen));
+    el.mobileRouteButton?.classList.toggle("is-active", shouldOpen);
+el.routeButton?.setAttribute("aria-expanded", String(shouldOpen));
 
     if (shouldOpen) {
       if (window.matchMedia("(max-width: 600px)").matches) {
@@ -2499,9 +2520,13 @@
   }
 
 function closeRoute() {
-    if (el.routePanel.hidden) return;    hideAllAutocomplete();
+    if (el.routePanel.hidden) return;
+    hideAllAutocomplete();
     el.routePanel.hidden = true;
     el.routeButton?.setAttribute("aria-expanded", "false");
+    el.routeButton?.classList.remove("is-active");
+    el.mobileRouteButton?.setAttribute("aria-expanded", "false");
+    el.mobileRouteButton?.classList.remove("is-active");
     document.body.classList.remove("map-picking-route");
   }
 
@@ -2526,6 +2551,82 @@ function closeRoute() {
     updateRouteClickHint();
   }
 
+
+
+  function cancelMapLongPress() {
+    if (state.mapLongPressTimer) {
+      window.clearTimeout(state.mapLongPressTimer);
+    }
+
+    state.mapLongPressTimer = null;
+    state.mapLongPressStartPoint = null;
+  }
+
+  function handleMapLongPressStart(event) {
+    if (
+      !window.matchMedia("(pointer: coarse)").matches ||
+      !event.points?.length
+    ) {
+      return;
+    }
+
+    cancelMapLongPress();
+    state.mapLongPressTriggered = false;
+    state.mapLongPressStartPoint = event.points[0];
+
+    const lngLat = new maplibregl.LngLat(
+      event.lngLat.lng,
+      event.lngLat.lat
+    );
+
+    state.mapLongPressTimer = window.setTimeout(() => {
+      state.mapLongPressTimer = null;
+      state.mapLongPressTriggered = true;
+
+      openMapContextMenu({
+        lngLat,
+        point: state.mapLongPressStartPoint,
+        originalEvent: event.originalEvent || {
+          clientX: state.mapLongPressStartPoint.x,
+          clientY: state.mapLongPressStartPoint.y,
+          preventDefault() {}
+        }
+      });
+
+      navigator.vibrate?.(35);
+    }, 550);
+  }
+
+  function handleMapLongPressMove(event) {
+    if (
+      !state.mapLongPressTimer ||
+      !state.mapLongPressStartPoint ||
+      !event.points?.length
+    ) {
+      return;
+    }
+
+    const point = event.points[0];
+    const distance = Math.hypot(
+      point.x - state.mapLongPressStartPoint.x,
+      point.y - state.mapLongPressStartPoint.y
+    );
+
+    if (distance > 12) {
+      cancelMapLongPress();
+    }
+  }
+
+  function handleMapLongPressEnd(event) {
+    const triggered = state.mapLongPressTriggered;
+    cancelMapLongPress();
+
+    if (triggered) {
+      event.preventDefault?.();
+      event.originalEvent?.preventDefault?.();
+      state.mapLongPressTriggered = false;
+    }
+  }
 
   function updateMapContextMenuLabels() {
     const t = text[state.language];
@@ -2757,6 +2858,11 @@ function closeRoute() {
   }
 
   async function handleMapClick(event) {
+    if (state.mapLongPressTriggered) {
+      state.mapLongPressTriggered = false;
+      return;
+    }
+
     closeMapContextMenu();
     removeContextPointMarker();
     collapseMobilePanels();
@@ -5371,7 +5477,12 @@ function closeRoute() {
     }
 
     el.menuPanel.hidden = !shouldOpen;
-    el.menuButton.setAttribute("aria-expanded", String(shouldOpen));
+    
+    el.menuButton?.setAttribute("aria-expanded", String(shouldOpen));
+    el.menuButton?.classList.toggle("is-active", shouldOpen);
+    el.mobileMenuButton?.setAttribute("aria-expanded", String(shouldOpen));
+    el.mobileMenuButton?.classList.toggle("is-active", shouldOpen);
+el.menuButton.setAttribute("aria-expanded", String(shouldOpen));
     el.mobileMenuButton?.classList.toggle("is-active", shouldOpen);
   }
 
@@ -5379,6 +5490,8 @@ function closeRoute() {
     if (el.menuPanel.hidden) return;
     el.menuPanel.hidden = true;
     el.menuButton?.setAttribute("aria-expanded", "false");
+    el.mobileMenuButton?.setAttribute("aria-expanded", "false");
+    el.mobileMenuButton?.classList.remove("is-active");
   }
 
   function locateFromMenu() {
