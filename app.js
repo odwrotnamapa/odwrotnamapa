@@ -4191,6 +4191,29 @@ function closeRoute() {
     el.routeDirections.hidden = false;
   }
 
+  function scrollPanelToElement(panel, element) {
+    if (!panel || !element) return;
+
+    window.requestAnimationFrame(() => {
+      window.requestAnimationFrame(() => {
+        const panelRect = panel.getBoundingClientRect();
+        const elementRect = element.getBoundingClientRect();
+        const stickyOffset = 84;
+
+        const targetTop =
+          panel.scrollTop +
+          elementRect.top -
+          panelRect.top -
+          stickyOffset;
+
+        panel.scrollTo({
+          top: Math.max(0, targetTop),
+          behavior: "smooth"
+        });
+      });
+    });
+  }
+
   function formatRouteStepDuration(seconds) {
     const minutes = Math.max(1, Math.round(Number(seconds) / 60));
     if (minutes < 60) {
@@ -4482,6 +4505,10 @@ function closeRoute() {
     );
 
     el.routeSummary.hidden = false;
+    scrollPanelToElement(
+      el.routePanel,
+      el.routeSummary
+    );
     if (el.routeShare) el.routeShare.hidden = false;
     if (el.routeWaypointNote) el.routeWaypointNote.hidden = false;
   }
@@ -5243,6 +5270,10 @@ function closeRoute() {
     if (el.discoverResultsList) {
       el.discoverResultsList.appendChild(listFragment);
       el.discoverResultsList.hidden = false;
+      scrollPanelToElement(
+        el.discoverPanel,
+        el.discoverResultsList
+      );
     }
   }
 

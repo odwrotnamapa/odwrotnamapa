@@ -3213,3 +3213,35 @@ a.place-card-row {
     max-height: none;
   }
 }
+
+
+/* Telefon: Trasa, Odkrywaj i Menu mają identyczne położenie */
+@media (max-width: 600px) {
+  .route-panel,
+  .discover-panel,
+  .menu-panel {
+    top: auto !important;
+    right: 8px !important;
+    bottom: 74px !important;
+    left: 8px !important;
+    width: auto !important;
+    max-height: calc(100vh - 90px) !important;
+    min-height: 48px !important;
+    border-radius: 20px !important;
+  }
+
+  .route-panel {
+    --route-sheet-height: 42vh;
+    height: var(--route-sheet-height) !important;
+  }
+
+  .discover-panel {
+    --discover-sheet-height: 42vh;
+    height: var(--discover-sheet-height) !important;
+  }
+
+  .menu-panel {
+    --menu-sheet-height: 42vh;
+    height: var(--menu-sheet-height) !important;
+  }
+}
