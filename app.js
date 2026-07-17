@@ -599,7 +599,6 @@
   el.discoverClose?.addEventListener("click", closeDiscover);
   el.discoverClear?.addEventListener("click", () => {
     clearDiscoverResults();
-    closeDiscover();
   });
 
   for (const button of el.discoverCategories.querySelectorAll(
@@ -614,7 +613,6 @@
   el.routeSwap?.addEventListener("click", swapRoutePoints);
   el.routeClear?.addEventListener("click", () => {
     clearRoute();
-    closeRoute();
   });
   el.routeForm?.addEventListener("submit", planRoute);
   el.routeShare?.addEventListener("click", shareRoute);
@@ -2461,6 +2459,7 @@ el.discoverButton?.setAttribute(
   function closeDiscover() {
     if (el.discoverPanel.hidden) return;
 
+    clearDiscoverResults();
     el.discoverPanel.hidden = true;
     el.discoverButton?.setAttribute("aria-expanded", "false");
     el.discoverButton?.classList.remove("is-active");
@@ -2515,12 +2514,14 @@ el.routeButton?.setAttribute("aria-expanded", String(shouldOpen));
 
   function closeRoutePanel() {
     if (el.routePanel.hidden) return;
+    clearRoute();
     el.routePanel.hidden = true;
     el.routeButton?.setAttribute("aria-expanded","false");
   }
 
 function closeRoute() {
     if (el.routePanel.hidden) return;
+    clearRoute();
     hideAllAutocomplete();
     el.routePanel.hidden = true;
     el.routeButton?.setAttribute("aria-expanded", "false");
@@ -2861,6 +2862,10 @@ function closeRoute() {
     if (state.mapLongPressTriggered) {
       state.mapLongPressTriggered = false;
       return;
+    }
+
+    if (!window.matchMedia("(max-width: 600px)").matches) {
+      closePlacePanel();
     }
 
     closeMapContextMenu();
