@@ -2444,7 +2444,10 @@ function closeRoute() {
       return;
     }
 
-    await showPlaceInformation(event);
+    // Zwykłe kliknięcie pustego obszaru mapy nie wykonuje
+    // reverse geocodingu i nie otwiera panelu Informacje.
+    // Szczegóły miejsca są dostępne tylko po świadomym wyborze:
+    // z wyszukiwarki, Odkrywaj, Ulubionych lub markera OMapy.
   }
 
 
@@ -2557,6 +2560,7 @@ function closeRoute() {
     closePlacePanel();
   }
 
+  // Wywoływana tylko dla świadomie wybranego miejsca.
   async function showPlaceInformation(event) {
     state.placeRequestController?.abort();
     state.placeRequestController = new AbortController();
