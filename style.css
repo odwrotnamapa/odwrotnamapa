@@ -4552,7 +4552,6 @@ textarea {
 }
 
 
-/* Legenda i O projekcie korzystają z tego samego standardu paneli */
 @media (max-width: 600px) {
   .legend-panel.menu-subpanel:not([hidden]) {
     height: var(
@@ -4581,4 +4580,275 @@ textarea {
     ) !important;
     overflow: hidden !important;
   }
+}
+
+
+/* =========================================================
+   Uniwersalny wygląd paneli — bez zmiany działającej logiki
+   ========================================================= */
+.app-sheet {
+  --app-sheet-corner-radius: 4px;
+  box-sizing: border-box;
+  background: var(--panel) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: var(--app-sheet-corner-radius) !important;
+  box-shadow: var(--shadow) !important;
+}
+
+.app-sheet,
+.app-sheet *,
+.menu-panel,
+.legend-panel,
+.route-panel,
+.favorites-panel,
+.place-panel,
+.about-panel,
+.discover-panel {
+  border-radius: min(
+    var(--app-sheet-corner-radius),
+    4px
+  );
+}
+
+.app-sheet__header {
+  min-height: 52px;
+  display: grid !important;
+  grid-template-columns: 34px minmax(0, 1fr) 34px;
+  align-items: center;
+  gap: 8px;
+  margin: 0 !important;
+  padding: 8px 14px !important;
+  border-bottom: 1px solid var(--border);
+  background: var(--panel) !important;
+  border-radius: 0 !important;
+}
+
+.app-sheet__header:not(.has-menu-back)::before {
+  content: "";
+  grid-column: 1;
+}
+
+.app-sheet__header h2 {
+  grid-column: 2;
+  margin: 0;
+  min-width: 0;
+  text-align: center;
+}
+
+.app-sheet__header .menu-back-button {
+  grid-column: 1;
+}
+
+.app-sheet__header .legend-close {
+  grid-column: 3;
+}
+
+.app-sheet__handle {
+  border-radius: 0 !important;
+}
+
+@media (max-width: 600px) {
+  .app-sheet:not([hidden]) {
+    border-radius: var(--app-sheet-corner-radius) !important;
+  }
+
+  .app-sheet__handle {
+    border-radius: 0 !important;
+  }
+
+  .app-sheet__handle::before {
+    border-radius: 2px !important;
+  }
+}
+
+/* Ostrzejsze rogi również dla pozostałych głównych elementów UI. */
+button,
+input,
+select,
+textarea,
+.search-bar,
+.search-results,
+.context-menu,
+.maplibregl-popup-content,
+.modal,
+.card,
+.place-card {
+  border-radius: 4px !important;
+}
+
+
+/* ChatGPT fix: square corners + header spacing */
+:root, * , *::before, *::after{
+  border-radius:0 !important;
+}
+.menu-panel,
+.legend-panel,
+.about-panel,
+.route-panel,
+.place-panel,
+.discover-panel,
+.favorites-panel{
+  border-radius:0 !important;
+}
+.app-sheet,
+.app-sheet__header{
+  border-radius:0 !important;
+}
+.app-sheet__header,
+.legend-header,
+.place-panel-header{
+  padding-bottom:16px !important;
+  margin-bottom:12px !important;
+}
+
+
+/* =========================================================
+   Finalna poprawka mobilnych rogów i uchwytów
+   ========================================================= */
+:root {
+  --panel-radius: 0px !important;
+  --app-sheet-corner-radius: 0px !important;
+}
+
+@media (max-width: 600px) {
+  #legend-panel,
+  #about-panel,
+  #route-panel,
+  #favorites-panel,
+  #place-panel,
+  #discover-panel,
+  #menu-panel,
+  .legend-panel,
+  .about-panel,
+  .route-panel,
+  .favorites-panel,
+  .place-panel,
+  .discover-panel,
+  .menu-panel,
+  .menu-subpanel,
+  .app-sheet,
+  .app-sheet::before,
+  .app-sheet::after,
+  .app-sheet > *,
+  .sheet-handle,
+  .app-sheet__handle,
+  .legend-header,
+  .place-panel-header {
+    border-radius: 0 !important;
+    clip-path: none !important;
+    mask-image: none !important;
+    -webkit-mask-image: none !important;
+  }
+
+  #legend-panel,
+  #about-panel {
+    overflow: hidden !important;
+  }
+}
+
+/* Bez wyjątków: wszystkie elementy interfejsu mają rogi 0 px. */
+*,
+*::before,
+*::after {
+  border-radius: 0 !important;
+}
+
+
+/* =========================================================
+   Jeden uniwersalny szkielet wszystkich paneli
+   ========================================================= */
+:root {
+  --panel-shell-handle-height: 28px;
+  --panel-shell-padding-x: 14px;
+  --panel-shell-header-gap: 12px;
+}
+
+.panel-shell,
+.panel-shell__handle,
+.panel-shell__header {
+  border-radius: 0 !important;
+}
+
+@media (max-width: 600px) {
+  .panel-shell:not([hidden]) {
+    position: absolute !important;
+    top: auto !important;
+    right: 8px !important;
+    bottom: 8px !important;
+    left: 8px !important;
+    width: auto !important;
+    padding: 0 var(--panel-shell-padding-x) 14px !important;
+    border-radius: 0 !important;
+    overflow-y: auto !important;
+    overscroll-behavior: contain;
+  }
+
+  .panel-shell > .panel-shell__handle {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 40 !important;
+    display: grid !important;
+    place-items: center !important;
+    width: 100% !important;
+    height: var(--panel-shell-handle-height) !important;
+    min-height: var(--panel-shell-handle-height) !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: var(--panel) !important;
+    cursor: grab !important;
+    touch-action: none !important;
+  }
+
+  .panel-shell > .panel-shell__handle:active {
+    cursor: grabbing !important;
+  }
+
+  .panel-shell > .panel-shell__handle > span {
+    display: block !important;
+    width: 44px !important;
+    height: 5px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border-radius: 0 !important;
+    background: color-mix(
+      in srgb,
+      var(--text) 35%,
+      transparent
+    ) !important;
+  }
+
+  .panel-shell > .panel-shell__header,
+  .panel-shell.menu-subpanel > .panel-shell__header {
+    position: sticky !important;
+    top: var(--panel-shell-handle-height) !important;
+    z-index: 39 !important;
+    min-height: 52px !important;
+    margin: 0
+      calc(var(--panel-shell-padding-x) * -1)
+      var(--panel-shell-header-gap) !important;
+    padding: 9px var(--panel-shell-padding-x) 10px !important;
+    border-bottom: 1px solid var(--border) !important;
+    border-radius: 0 !important;
+    background: var(--panel) !important;
+    backdrop-filter: blur(12px);
+  }
+
+  .panel-shell.is-collapsed >
+  .panel-shell__handle {
+    height: 48px !important;
+    min-height: 48px !important;
+  }
+
+  .panel-shell.is-collapsed >
+  .panel-shell__handle > span {
+    width: 52px !important;
+  }
+}
+
+*,
+*::before,
+*::after {
+  border-radius: 0 !important;
 }

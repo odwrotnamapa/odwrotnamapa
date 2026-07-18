@@ -83,12 +83,12 @@
 
     </header>
 
-    <aside id="legend-panel" class="legend-panel menu-subpanel" aria-labelledby="legend-title" hidden>
-      <button id="legend-sheet-handle"
-              class="mobile-sheet-handle"
-              type="button"
-              aria-label="Przeciągnij lub zwiń panel"></button>
-      <div class="legend-header has-menu-back">
+    <aside id="legend-panel" class="legend-panel menu-subpanel app-sheet app-sheet--sharp panel-shell" aria-labelledby="legend-title" hidden>
+      <button id="legend-sheet-handle" class="route-sheet-handle app-sheet__handle panel-shell__handle" type="button"
+              aria-label="Zmień wysokość panelu trasy">
+        <span aria-hidden="true"></span>
+      </button>
+      <div class="legend-header has-menu-back app-sheet__header panel-shell__header">
         <button id="legend-back"
                 class="menu-back-button"
                 type="button"
@@ -149,20 +149,18 @@
       </p>
     </aside>
 
-
     
-    <aside id="route-panel" class="legend-panel route-panel"
+    <aside id="route-panel" class="legend-panel route-panel app-sheet app-sheet--sharp panel-shell"
            aria-labelledby="route-title" hidden>
-      <button id="route-sheet-handle" class="route-sheet-handle" type="button"
+      <button id="route-sheet-handle" class="route-sheet-handle app-sheet__handle panel-shell__handle" type="button"
               aria-label="Zmień wysokość panelu trasy">
         <span aria-hidden="true"></span>
       </button>
-      <div class="legend-header">
+      <div class="legend-header app-sheet__header panel-shell__header">
         <h2 id="route-title">Trasa</h2>
         <button id="route-close" class="legend-close" type="button"
                 aria-label="Zamknij planer trasy">×</button>
       </div>
-
 
       <p id="route-click-hint" class="route-click-hint">
         Kliknij na mapie, aby wybrać punkt początkowy.
@@ -228,7 +226,6 @@
         Udostępnij trasę
       </button>
 
-
       <p id="route-waypoint-note" class="route-waypoint-note" hidden>
         Kliknij linię trasy, aby dodać punkt pośredni. Punkt można przeciągać.
       </p>
@@ -246,20 +243,19 @@
       </p>
     </aside>
 
-
     
     <aside id="favorites-panel"
-           class="legend-panel favorites-panel"
+           class="legend-panel favorites-panel app-sheet app-sheet--sharp panel-shell"
            aria-labelledby="favorites-title"
            hidden>
       <button id="favorites-sheet-handle"
-              class="route-sheet-handle favorites-sheet-handle"
+              class="route-sheet-handle favorites-sheet-handle app-sheet__handle panel-shell__handle"
               type="button"
               aria-label="Zmień wysokość panelu Ulubione">
         <span aria-hidden="true"></span>
       </button>
 
-      <div class="legend-header has-menu-back">
+      <div class="legend-header has-menu-back app-sheet__header panel-shell__header">
         <button id="favorites-back"
                 class="menu-back-button"
                 type="button"
@@ -315,20 +311,18 @@
       </div>
     </aside>
 
-
-
     <aside id="place-panel"
-           class="legend-panel place-panel"
+           class="legend-panel place-panel app-sheet app-sheet--sharp panel-shell"
            aria-labelledby="place-panel-title"
            hidden>
       <button id="place-sheet-handle"
-              class="route-sheet-handle place-sheet-handle"
+              class="route-sheet-handle place-sheet-handle app-sheet__handle panel-shell__handle"
               type="button"
               aria-label="Zmień wysokość panelu informacji">
         <span aria-hidden="true"></span>
       </button>
 
-      <div class="legend-header place-panel-header">
+      <div class="legend-header place-panel-header app-sheet__header panel-shell__header">
         <button id="place-panel-back"
                 class="menu-back-button place-panel-back"
                 type="button"
@@ -346,14 +340,13 @@
            aria-live="polite"></div>
     </aside>
 
-
-    <aside id="about-panel" class="legend-panel about-panel menu-subpanel"
+    <aside id="about-panel" class="legend-panel about-panel menu-subpanel app-sheet app-sheet--sharp panel-shell"
            aria-labelledby="about-title" hidden>
-      <button id="about-sheet-handle"
-              class="mobile-sheet-handle"
-              type="button"
-              aria-label="Przeciągnij lub zwiń panel"></button>
-      <div class="legend-header has-menu-back">
+      <button id="about-sheet-handle" class="route-sheet-handle app-sheet__handle panel-shell__handle" type="button"
+              aria-label="Zmień wysokość panelu trasy">
+        <span aria-hidden="true"></span>
+      </button>
+      <div class="legend-header has-menu-back app-sheet__header panel-shell__header">
         <button id="about-back"
                 class="menu-back-button"
                 type="button"
@@ -393,19 +386,18 @@
       </dl>
     </aside>
 
-
     <ul id="autocomplete-floating" class="autocomplete-list autocomplete-floating" hidden></ul>
 
     
-    <aside id="discover-panel" class="legend-panel discover-panel"
+    <aside id="discover-panel" class="legend-panel discover-panel app-sheet app-sheet--sharp panel-shell"
            aria-labelledby="discover-title" hidden>
       <button id="discover-sheet-handle"
-              class="discover-sheet-handle"
+              class="discover-sheet-handle app-sheet__handle panel-shell__handle"
               type="button"
               aria-label="Zmień wysokość panelu Odkrywaj">
         <span aria-hidden="true"></span>
       </button>
-      <div class="legend-header">
+      <div class="legend-header app-sheet__header panel-shell__header">
         <h2 id="discover-title">Odkrywaj</h2>
         <button id="discover-close" class="legend-close" type="button"
                 aria-label="Zamknij Odkrywaj">×</button>
@@ -442,15 +434,15 @@
       </button>
     </aside>
 
-    <aside id="menu-panel" class="legend-panel menu-panel"
+    <aside id="menu-panel" class="legend-panel menu-panel app-sheet app-sheet--sharp panel-shell"
            aria-labelledby="menu-title" hidden>
       <button id="menu-sheet-handle"
-              class="route-sheet-handle menu-sheet-handle"
+              class="route-sheet-handle menu-sheet-handle app-sheet__handle panel-shell__handle"
               type="button"
               aria-label="Zmień wysokość menu">
         <span aria-hidden="true"></span>
       </button>
-      <div class="legend-header">
+      <div class="legend-header app-sheet__header panel-shell__header">
         <h2 id="menu-title">Menu</h2>
         <button id="menu-close" class="legend-close" type="button"
                 aria-label="Zamknij menu">×</button>
@@ -464,8 +456,6 @@
           <span aria-hidden="true">⭐</span>
           <span id="favorites-menu-label">Ulubione</span>
         </button>
-
-
 
         <button id="menu-location-button" class="menu-action" type="button">
           <span aria-hidden="true">📍</span>
@@ -481,7 +471,6 @@
           </select>
         </label>
 
-
         <label class="menu-setting">
           <span aria-hidden="true">🌐</span>
           <span id="menu-language-label">Język</span>
@@ -490,7 +479,6 @@
             <option value="en">🇬🇧 English</option>
           </select>
         </label>
-
 
         <button id="menu-legend-button" class="menu-action" type="button">
           <span aria-hidden="true">🗺️</span>
@@ -509,7 +497,6 @@
       </div>
     </aside>
 
-
     
     <nav id="mobile-bottom-nav" class="mobile-bottom-nav"
          aria-label="Główne funkcje mapy">
@@ -526,8 +513,6 @@
         <span>Menu</span>
       </button>
     </nav>
-
-
 
     <div id="map-context-menu"
          class="map-context-menu"
@@ -594,6 +579,21 @@
   <script src="search-v2/localization/pl-categories.js?v=20260717203448"></script>
   <script src="search-v2/localization/categories.js?v=20260717203448"></script>
     <script src="search-v2/session.js"></script>
+  <script src="src/models/place.js"></script>
+  <script src="src/components/bottom-sheet.js"></script>
+  <script src="src/components/photo-gallery.js"></script>
+  <script src="src/components/place-card.js"></script>
+  <script src="src/components/back-navigation.js"></script>
+  <script src="src/components/ui-foundation.js"></script>
+  <script src="src/services/category-service.js"></script>
+  <script src="src/services/opening-hours-service.js"></script>
+  <script src="src/services/address-service.js"></script>
+  <script src="src/services/photo-cache.js"></script>
+  <script src="src/services/photo-source-resolver.js"></script>
+  <script src="src/services/photo-service.js"></script>
+  <script src="src/services/place-resolver-service.js"></script>
+  <script src="src/services/place-service.js"></script>
+
   <script src="app.js?v=20260717203448"></script>
 </body>
 </html>

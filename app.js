@@ -1,6 +1,8 @@
 (() => {
   "use strict";
 
+  // Architektura 2.0: komponenty i serwisy są ładowane przed app.js.
+
   const CONFIG = window.SOUTHMAPS_CONFIG;
   const $ = id => document.getElementById(id);
 
@@ -1295,7 +1297,15 @@
             query: el.searchInput?.value || label
           });
           prepareMobilePlacePanelAfterSearch();
-          showSelectedPlaceInformation(result);
+          openSearchPlaceThroughService(
+            result,
+            {
+              query:
+                el.searchInput?.value ||
+                label,
+              origin: "autocomplete"
+            }
+          );
 
           map.flyTo({
             center: [lon, lat],
@@ -1524,20 +1534,20 @@
           });
           prepareMobilePlacePanelAfterSearch();
 
-          if (isExactPlace) {
-            showSelectedPlaceInformation({
+          openSearchPlaceThroughService(
+            {
               ...entry,
               _exactLocalIdentity:
                 entry.exactLocalIdentity
-            });
-          } else {
-            showPlaceInformation({
-              lngLat: new maplibregl.LngLat(
-                entry.lon,
-                entry.lat
-              )
-            });
-          }
+            },
+            {
+              query:
+                el.searchInput?.value ||
+                entry.label,
+              reverse: !isExactPlace,
+              origin: "search-history"
+            }
+          );
 
           map.flyTo({
             center: [entry.lon, entry.lat],
@@ -2702,12 +2712,6 @@
   }
 
 
-
-
-
-
-
-
   function toggleDiscover() {
     closeMapContextMenu();
     closePlacePanel();
@@ -2836,7 +2840,6 @@ function closeRoute() {
       : "a";
     updateRouteClickHint();
   }
-
 
 
   function cancelMapLongPress() {
@@ -3099,11 +3102,14 @@ function closeRoute() {
 
     if (action === "info") {
       removeContextPointMarker();
-      invalidateNamedPoiGuard();
-      await showPlaceInformation({
+
+      await openMapInformationThroughService(
         lngLat,
-        forceReverse: true
-      });
+        {
+          origin: "map-context-menu"
+        }
+      );
+
       return;
     }
 
@@ -3196,8 +3202,7 @@ function closeRoute() {
   }
 
 
-
-  function getLocalizedCategory(result) {
+  function getLocalizedCategoryLegacy(result) {
     return window.OMAP_CATEGORY_LABELS
       ? window.OMAP_CATEGORY_LABELS.resolve(result, state.language)
       : {
@@ -3207,6 +3212,31 @@ function closeRoute() {
           icon: "📍"
         };
   }
+
+  window.OMAP_CATEGORY_SERVICE?.configure({
+    resolve(result, language) {
+      if (window.OMAP_CATEGORY_LABELS) {
+        return window.OMAP_CATEGORY_LABELS.resolve(
+          result,
+          language
+        );
+      }
+
+      return getLocalizedCategoryLegacy(result);
+    }
+  });
+
+  function getLocalizedCategory(result) {
+    if (window.OMAP_CATEGORY_SERVICE) {
+      return window.OMAP_CATEGORY_SERVICE.resolve(
+        result,
+        state.language
+      );
+    }
+
+    return getLocalizedCategoryLegacy(result);
+  }
+
 
   function getResultLngLat(result) {
     const lng = Number(result?.lon ?? result?.center?.lon ?? result?.center?.lng);
@@ -3435,22 +3465,14 @@ function closeRoute() {
 
 
   function setPlacePanelReturnTarget(type, data = {}) {
-    state.placePanelReturnTarget = type
-      ? { type, ...data }
-      : null;
-
-    if (el.placePanelBack) {
-      el.placePanelBack.hidden =
-        !state.placePanelReturnTarget;
-    }
+    window.OMAP_BACK_NAVIGATION.set(
+      type,
+      data
+    );
   }
 
   function clearPlacePanelReturnTarget() {
-    state.placePanelReturnTarget = null;
-
-    if (el.placePanelBack) {
-      el.placePanelBack.hidden = true;
-    }
+    window.OMAP_BACK_NAVIGATION.clear();
   }
 
   function reopenSearchResults(query) {
@@ -3503,26 +3525,52 @@ function closeRoute() {
     el.mobileDiscoverButton?.classList.add("is-active");
   }
 
+
+  window.OMAP_BACK_NAVIGATION?.configure({
+    onChange(target) {
+      state.placePanelReturnTarget =
+        target;
+
+      if (el.placePanelBack) {
+        el.placePanelBack.hidden =
+          !target;
+      }
+    }
+  });
+
+  window.OMAP_BACK_NAVIGATION?.register(
+    "favorites",
+    () => openFavoritesPanel()
+  );
+
+  window.OMAP_BACK_NAVIGATION?.register(
+    "discover",
+    () => reopenDiscoverPanel()
+  );
+
+  window.OMAP_BACK_NAVIGATION?.register(
+    "search",
+    target => {
+      reopenSearchResults(
+        target.query || ""
+      );
+    }
+  );
+
   function returnFromPlacePanel() {
-    const target = state.placePanelReturnTarget;
+    const target =
+      window.OMAP_BACK_NAVIGATION.get();
 
     closePlacePanel();
 
     if (!target) return;
 
-    if (target.type === "favorites") {
-      openFavoritesPanel();
-      return;
-    }
+    window.OMAP_BACK_NAVIGATION.set(
+      target.type,
+      target
+    );
 
-    if (target.type === "discover") {
-      reopenDiscoverPanel();
-      return;
-    }
-
-    if (target.type === "search") {
-      reopenSearchResults(target.query || "");
-    }
+    window.OMAP_BACK_NAVIGATION.goBack();
   }
 
   function openPlacePanel() {
@@ -3664,22 +3712,37 @@ function closeRoute() {
     return response.json();
   }
 
-  function createPlaceCard(place, lngLat) {
+  function createPlaceCardLegacy(place, lngLat) {
     const t = text[state.language];
     const card = document.createElement("article");
     card.className = "place-card";
 
-    const imageUrl = getPlaceImageUrl(place);
-    if (imageUrl) {
-      const image = document.createElement("img");
-      image.className = "place-card-image";
-      image.src = imageUrl;
-      image.alt = "";
-      image.loading = "lazy";
-      image.decoding = "async";
-      image.referrerPolicy = "no-referrer";
-      image.addEventListener("error", () => image.remove());
-      card.appendChild(image);
+    if (window.OMAP_PHOTO_GALLERY) {
+      card.appendChild(
+        window.OMAP_PHOTO_GALLERY.create(
+          place,
+          {
+            getImageUrl: getPlaceImageUrl
+          }
+        )
+      );
+    } else {
+      const imageUrl = getPlaceImageUrl(place);
+
+      if (imageUrl) {
+        const image = document.createElement("img");
+        image.className = "place-card-image";
+        image.src = imageUrl;
+        image.alt = "";
+        image.loading = "lazy";
+        image.decoding = "async";
+        image.referrerPolicy = "no-referrer";
+        image.addEventListener(
+          "error",
+          () => image.remove()
+        );
+        card.appendChild(image);
+      }
     }
 
     const headingRow = document.createElement("div");
@@ -3805,6 +3868,24 @@ function closeRoute() {
     card.appendChild(actions);
     return card;
   }
+
+  window.OMAP_PLACE_CARD?.configure({
+    render: createPlaceCardLegacy
+  });
+
+  function createPlaceCard(place, lngLat) {
+    if (
+      window.OMAP_PLACE_CARD?.isConfigured?.()
+    ) {
+      return window.OMAP_PLACE_CARD.create(
+        place,
+        lngLat
+      );
+    }
+
+    return createPlaceCardLegacy(place, lngLat);
+  }
+
 
   function createInteractivePlaceRow(iconText, valueText, onClick) {
     const button = document.createElement("button");
@@ -3941,7 +4022,25 @@ function closeRoute() {
     );
   }
 
-  function getPlaceAddress(place) {
+
+  function formatPlaceOpeningHours(place) {
+    if (window.OMAP_OPENING_HOURS_SERVICE) {
+      return window.OMAP_OPENING_HOURS_SERVICE.fromPlace(
+        place,
+        {
+          language: state.language
+        }
+      );
+    }
+
+    return String(
+      place?.opening_hours ||
+      place?.extratags?.opening_hours ||
+      ""
+    );
+  }
+
+  function getPlaceAddressLegacy(place) {
     const address = place.address || {};
     const road = address.road || address.pedestrian || "";
     const number = address.house_number || "";
@@ -3959,6 +4058,25 @@ function closeRoute() {
     return parts.length
       ? [...new Set(parts)].join(", ")
       : place.display_name || "";
+  }
+
+  window.OMAP_ADDRESS_SERVICE?.configure({
+    format(place) {
+      return getPlaceAddressLegacy(place);
+    }
+  });
+
+  function getPlaceAddress(place) {
+    if (window.OMAP_ADDRESS_SERVICE) {
+      return window.OMAP_ADDRESS_SERVICE.format(
+        place,
+        {
+          language: state.language
+        }
+      );
+    }
+
+    return getPlaceAddressLegacy(place);
   }
 
 
@@ -4019,7 +4137,7 @@ function closeRoute() {
     return category?.icon || "📍";
   }
 
-  function getPlaceImageUrl(place) {
+  function getPlaceImageUrlLegacy(place) {
     const extra = place.extratags || {};
     const candidates = [
       extra.image,
@@ -4052,6 +4170,18 @@ function closeRoute() {
 
     return "";
   }
+  window.OMAP_PHOTO_SERVICE?.configure({
+    resolveLegacy(place) {
+      const url = getPlaceImageUrlLegacy(place);
+      return url ? [{ url, source: "legacy" }] : [];
+    }
+  });
+
+  function getPlaceImageUrl(place) {
+    const photo = window.OMAP_PHOTO_SERVICE?.getSync(place);
+    return photo?.url || getPlaceImageUrlLegacy(place);
+  }
+
 
   function createPlaceAction(
     icon,
@@ -5846,6 +5976,177 @@ function closeRoute() {
     el.favoritesPanel.hidden = true;
   }
 
+
+  window.OMAP_PLACE_SERVICE?.configure({
+    async open(event) {
+      if (
+        event.source !== "favorite" &&
+        event.source !== "favorites" &&
+        event.source !== "discover" &&
+        event.source !== "search" &&
+        event.source !== "search-history" &&
+        event.source !== "map-info"
+      ) {
+        return;
+      }
+
+      const place = event.place;
+      const lon = Number(place.lon);
+      const lat = Number(place.lat);
+
+      if (
+        event.source === "search" ||
+        event.source === "search-history"
+      ) {
+        if (event.metadata?.reverse) {
+          invalidateNamedPoiGuard();
+
+          await showPlaceInformation({
+            lngLat: new maplibregl.LngLat(
+              lon,
+              lat
+            ),
+            forceReverse: Boolean(
+              event.metadata.forceReverse
+            )
+          });
+        } else {
+          await showSelectedPlaceInformation(place);
+        }
+
+        return;
+      }
+
+      if (event.source === "map-info") {
+        invalidateNamedPoiGuard();
+
+        await showPlaceInformation({
+          lngLat: new maplibregl.LngLat(
+            lon,
+            lat
+          ),
+          forceReverse: true
+        });
+
+        return;
+      }
+
+      if (event.source === "discover") {
+        setPlacePanelReturnTarget("discover");
+        showSelectedPlaceInformation(place);
+
+        map.easeTo({
+          center: [lon, lat],
+          zoom: Math.max(map.getZoom(), 16),
+          bearing: 180,
+          duration: 600
+        });
+
+        return;
+      }
+
+      const hasExactIdentity = Boolean(
+        place.exactLocalIdentity ||
+        place.provider === "named-poi" ||
+        place.namedPoiId ||
+        (place.osm_type && place.osm_id)
+      );
+
+      setPlacePanelReturnTarget("favorites");
+
+      if (hasExactIdentity) {
+        showSelectedPlaceInformation({
+          ...place,
+          _exactLocalIdentity:
+            place.exactLocalIdentity,
+          providers:
+            place.providers?.length
+              ? place.providers
+              : [place.provider].filter(Boolean)
+        });
+      } else {
+        invalidateNamedPoiGuard();
+
+        showPlaceInformation({
+          lngLat: new maplibregl.LngLat(
+            lon,
+            lat
+          ),
+          forceReverse: true
+        });
+      }
+
+      map.flyTo({
+        center: [lon, lat],
+        zoom: Math.max(map.getZoom(), 16),
+        bearing: 180
+      });
+    }
+  });
+
+  async function openFavoritePlace(favorite) {
+    return window.OMAP_PLACE_SERVICE.open(
+      favorite,
+      {
+        source: "favorite",
+        metadata: {
+          origin: "favorites-panel"
+        }
+      }
+    );
+  }
+
+
+  async function openSearchPlaceThroughService(
+    result,
+    {
+      query = "",
+      reverse = false,
+      forceReverse = false,
+      origin = "search"
+    } = {}
+  ) {
+    return window.OMAP_PLACE_SERVICE.open(
+      result,
+      {
+        source:
+          origin === "search-history"
+            ? "search-history"
+            : "search",
+        metadata: {
+          origin,
+          query,
+          reverse,
+          forceReverse
+        }
+      }
+    );
+  }
+
+  async function openMapInformationThroughService(
+    lngLat,
+    {
+      origin = "map-context-menu"
+    } = {}
+  ) {
+    return window.OMAP_PLACE_SERVICE.open(
+      {
+        name: "Wybrane miejsce",
+        lat: Number(lngLat.lat),
+        lon: Number(lngLat.lng),
+        category: "place",
+        source: "map-info",
+        provider: "map"
+      },
+      {
+        source: "map-info",
+        metadata: {
+          origin
+        }
+      }
+    );
+  }
+
   function renderFavoritesList() {
     if (
       !el.favoritesList ||
@@ -5928,61 +6229,14 @@ function closeRoute() {
       copy.append(title, address);
       openButton.append(icon, copy);
 
-      openButton.addEventListener("click", () => {
-        const lon = Number(favorite.lon);
-        const lat = Number(favorite.lat);
+      openButton.addEventListener(
+        "click",
+        () => {
+          openFavoritePlace(favorite);
 
-        const hasExactIdentity = Boolean(
-          favorite.exactLocalIdentity ||
-          favorite.provider === "named-poi" ||
-          favorite.namedPoiId ||
-          (favorite.osm_type && favorite.osm_id)
-        );
-
-        setPlacePanelReturnTarget("favorites");
-
-        if (hasExactIdentity) {
-          showSelectedPlaceInformation({
-            ...favorite,
-            name:
-              favorite.name ||
-              favorite.title,
-            display_name:
-              favorite.display_name ||
-              favorite.address ||
-              favorite.title,
-            address: {
-              ...(favorite.addressDetails || {})
-            },
-            extratags: {
-              ...(favorite.extratags || {})
-            },
-            namedetails: {
-              ...(favorite.namedetails || {})
-            },
-            _exactLocalIdentity:
-              favorite.exactLocalIdentity,
-            providers:
-              favorite.providers?.length
-                ? favorite.providers
-                : [favorite.provider].filter(Boolean)
-          });
-        } else {
-          invalidateNamedPoiGuard();
-          showPlaceInformation({
-            lngLat: new maplibregl.LngLat(lon, lat),
-            forceReverse: true
-          });
+          // Panel Ulubione celowo pozostaje otwarty.
         }
-
-        map.flyTo({
-          center: [lon, lat],
-          zoom: Math.max(map.getZoom(), 16),
-          bearing: 180
-        });
-
-        // Panel Ulubione celowo pozostaje otwarty.
-      });
+      );
 
       const removeButton = document.createElement("button");
       removeButton.type = "button";
@@ -6134,7 +6388,6 @@ function closeRoute() {
       show(text[state.language].favoritesImportError);
     }
   }
-
 
 
   function openMenuHome() {
@@ -6742,6 +6995,8 @@ el.menuButton.setAttribute("aria-expanded", String(shouldOpen));
   }
 
   function renderDiscoverResults(places, category) {
+    window.OMAP_PHOTO_SERVICE?.preload(places);
+
     el.discoverResultsList?.replaceChildren();
 
     const listFragment = document.createDocumentFragment();
@@ -6770,53 +7025,57 @@ el.menuButton.setAttribute("aria-expanded", String(shouldOpen));
             category
           );
 
-        setPlacePanelReturnTarget("discover");
-        showSelectedPlaceInformation({
-            place_id: `discover:${place.type || "node"}:${place.id || index}`,
-            osm_type: place.type || "",
-            osm_id: place.id || "",
-            lon: place.lon,
-            lat: place.lat,
-            name:
-              place.tags.name ||
-              place.tags.brand ||
-              `${category.emoji} ${index + 1}`,
-            display_name:
-              place.tags.name ||
-              place.tags.brand ||
+        const rawPlace = {
+          place_id: `discover:${place.type || "node"}:${place.id || index}`,
+          osm_type: place.type || "",
+          osm_id: place.id || "",
+          lon: Number(place.lon),
+          lat: Number(place.lat),
+          name:
+            place.tags.name ||
+            place.tags.brand ||
+            `${category.emoji} ${index + 1}`,
+          display_name:
+            place.tags.name ||
+            place.tags.brand ||
+            "",
+          class: classification.class,
+          type: classification.type,
+          category: classification.category,
+          address: {
+            ...(place.address || {}),
+            road:
+              place.tags["addr:street"] ||
+              place.address?.road ||
               "",
-            class: classification.class,
-            type: classification.type,
-            category: classification.category,
-            address: {
-              ...(place.address || {}),
-              road:
-                place.tags["addr:street"] ||
-                place.address?.road ||
-                "",
-              house_number:
-                place.tags["addr:housenumber"] ||
-                place.address?.house_number ||
-                "",
-              city:
-                place.tags["addr:city"] ||
-                place.address?.city ||
-                ""
-            },
-            extratags: {
-              ...place.tags
-            },
-            namedetails: {
-              ...(place.namedetails || {})
-            }
-          });
+            house_number:
+              place.tags["addr:housenumber"] ||
+              place.address?.house_number ||
+              "",
+            city:
+              place.tags["addr:city"] ||
+              place.address?.city ||
+              ""
+          },
+          extratags: {
+            ...place.tags
+          },
+          namedetails: {
+            ...(place.namedetails || {})
+          },
+          source: "discover",
+          provider: "discover"
+        };
 
-        map.easeTo({
-          center: [place.lon, place.lat],
-          zoom: Math.max(map.getZoom(), 16),
-          bearing: 180,
-          duration: 600
-        });
+        window.OMAP_PLACE_SERVICE.open(
+          rawPlace,
+          {
+            source: "discover",
+            metadata: {
+              origin: "discover-panel"
+            }
+          }
+        );
       };
 
       element.addEventListener("click", event => {
@@ -7408,7 +7667,13 @@ el.menuButton.setAttribute("aria-expanded", String(shouldOpen));
         query: q
       });
       prepareMobilePlacePanelAfterSearch();
-      showSelectedPlaceInformation(result);
+      openSearchPlaceThroughService(
+        result,
+        {
+          query: q,
+          origin: "search-submit"
+        }
+      );
 
       map.flyTo({
         center: point,
