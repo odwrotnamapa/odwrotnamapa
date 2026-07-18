@@ -46,7 +46,7 @@ const checks = [
   [
     "height remains 42 percent",
     app.includes(
-      "const height = window.innerHeight * 0.42"
+      'const height = "42dvh"'
     )
   ],
   [

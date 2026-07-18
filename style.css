@@ -4428,3 +4428,37 @@ textarea {
     display: none !important;
   }
 }
+
+
+/* =========================================================
+   Ostateczna, wspólna wysokość mobilnego panelu Informacje
+   ========================================================= */
+@media (max-width: 600px) {
+  body:has(.place-panel:not([hidden])) .place-panel {
+    --place-sheet-height: 42dvh !important;
+    height: 42dvh !important;
+    max-height: 42dvh !important;
+    min-height: 42dvh !important;
+    bottom: 8px !important;
+    overflow-y: auto !important;
+  }
+
+  body:has(.place-panel:not([hidden]))
+  .place-panel.is-collapsed {
+    height: 42dvh !important;
+    max-height: 42dvh !important;
+    min-height: 42dvh !important;
+  }
+
+  body:has(.place-panel:not([hidden]))
+  .place-panel.is-collapsed
+  > :not(.place-sheet-handle) {
+    display: initial;
+  }
+
+  body:has(.place-panel:not([hidden]))
+  .place-panel.is-collapsed
+  .place-sheet-handle {
+    height: 28px;
+  }
+}

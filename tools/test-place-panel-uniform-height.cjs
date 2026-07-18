@@ -23,7 +23,7 @@ const checks = [
   [
     "mobile height is always reset",
     normalizeBlock.includes(
-      "const height = window.innerHeight * 0.42"
+      'const height = "42dvh"'
     )
   ],
   [

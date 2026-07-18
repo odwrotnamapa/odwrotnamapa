@@ -3328,15 +3328,15 @@ function closeRoute() {
       return;
     }
 
-    const height = window.innerHeight * 0.42;
+    const height = "42dvh";
 
     el.placePanel.style.setProperty(
       "--place-sheet-height",
-      `${height}px`
+      height
     );
     document.documentElement.style.setProperty(
       "--place-sheet-height",
-      `${height}px`
+      height
     );
     el.placePanel.classList.remove("is-collapsed");
     el.placePanel.scrollTop = 0;
