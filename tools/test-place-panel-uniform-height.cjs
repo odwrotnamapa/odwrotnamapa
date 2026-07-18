@@ -14,10 +14,15 @@ const openBlock =
     /function openPlacePanel\(\) \{[\s\S]*?\n  \}/
   )?.[0] || "";
 
+const normalizeBlock =
+  app.match(
+    /function normalizeMobilePlacePanelHeight\(\) \{[\s\S]*?\n  \}/
+  )?.[0] || "";
+
 const checks = [
   [
     "mobile height is always reset",
-    openBlock.includes(
+    normalizeBlock.includes(
       "const height = window.innerHeight * 0.42"
     )
   ],
@@ -29,28 +34,28 @@ const checks = [
   ],
   [
     "panel variable is set directly",
-    openBlock.includes(
+    normalizeBlock.includes(
       'el.placePanel.style.setProperty('
     ) &&
-    openBlock.includes(
+    normalizeBlock.includes(
       '"--place-sheet-height"'
     )
   ],
   [
     "global sheet variable is synchronized",
-    openBlock.includes(
+    normalizeBlock.includes(
       "document.documentElement.style.setProperty"
     )
   ],
   [
     "collapsed state is always removed",
-    openBlock.includes(
+    normalizeBlock.includes(
       'classList.remove("is-collapsed")'
     )
   ],
   [
     "panel scroll position is reset",
-    openBlock.includes(
+    normalizeBlock.includes(
       "el.placePanel.scrollTop = 0"
     )
   ]

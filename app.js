@@ -3199,6 +3199,10 @@ function closeRoute() {
     showSelectedPlaceMarker(lngLat);
     openPlacePanel();
     renderPlaceInformation(details, lngLat);
+
+    // Po zamknięciu listy wyników przeglądarka ponownie układa
+    // mobilny interfejs, więc utrwalamy tę samą wysokość panelu.
+    stabilizeMobilePlacePanelHeight();
   }
 
   function renderPlaceInformation(place, lngLat) {
@@ -3314,6 +3318,42 @@ function closeRoute() {
     state.userLocationMarker = null;
   }
 
+
+  function normalizeMobilePlacePanelHeight() {
+    if (
+      !el.placePanel ||
+      el.placePanel.hidden ||
+      !window.matchMedia("(max-width: 600px)").matches
+    ) {
+      return;
+    }
+
+    const height = window.innerHeight * 0.42;
+
+    el.placePanel.style.setProperty(
+      "--place-sheet-height",
+      `${height}px`
+    );
+    document.documentElement.style.setProperty(
+      "--place-sheet-height",
+      `${height}px`
+    );
+    el.placePanel.classList.remove("is-collapsed");
+    el.placePanel.scrollTop = 0;
+  }
+
+  function stabilizeMobilePlacePanelHeight() {
+    normalizeMobilePlacePanelHeight();
+
+    window.requestAnimationFrame(() => {
+      normalizeMobilePlacePanelHeight();
+
+      window.requestAnimationFrame(() => {
+        normalizeMobilePlacePanelHeight();
+      });
+    });
+  }
+
   function openPlacePanel() {
     closeMenu();
     closeLegend();
@@ -3325,23 +3365,7 @@ function closeRoute() {
     if (!el.placePanel) return;
 
     el.placePanel.hidden = false;
-
-    if (
-      window.matchMedia("(max-width: 600px)").matches
-    ) {
-      const height = window.innerHeight * 0.42;
-
-      el.placePanel.style.setProperty(
-        "--place-sheet-height",
-        `${height}px`
-      );
-      document.documentElement.style.setProperty(
-        "--place-sheet-height",
-        `${height}px`
-      );
-      el.placePanel.classList.remove("is-collapsed");
-      el.placePanel.scrollTop = 0;
-    }
+    stabilizeMobilePlacePanelHeight();
   }
 
   function closePlacePanel() {
@@ -3420,6 +3444,8 @@ function closeRoute() {
       el.placePanelContent.replaceChildren(
         createPlaceCard(place, event.lngLat)
       );
+
+      stabilizeMobilePlacePanelHeight();
 
       el.placePanel.scrollTo({
         top: 0,
