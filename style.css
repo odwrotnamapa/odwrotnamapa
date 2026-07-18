@@ -4462,3 +4462,22 @@ textarea {
     height: 28px;
   }
 }
+
+
+/* Nawigacja wstecz z panelu Informacje */
+.place-panel-header {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr) 34px;
+  align-items: center;
+  gap: 8px;
+}
+
+.place-panel-header h2 {
+  min-width: 0;
+  text-align: center;
+}
+
+.place-panel-back[hidden] {
+  visibility: hidden;
+  display: grid;
+}

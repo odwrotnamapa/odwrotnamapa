@@ -137,6 +137,7 @@
       mapCleared: "Wyczyszczono elementy mapy.",
       placePanelTitle: "Informacje",
       placePanelClose: "Zamknij informacje o miejscu",
+      placePanelBack: "Wróć do poprzedniego panelu",
       placePanelResize: "Zmień wysokość panelu informacji",
       placeLoading: "Pobieranie informacji o miejscu…",
       placeUnknown: "Wybrane miejsce",
@@ -296,6 +297,7 @@
       mapCleared: "Map elements cleared.",
       placePanelTitle: "Information",
       placePanelClose: "Close place information",
+      placePanelBack: "Return to the previous panel",
       placePanelResize: "Resize place information panel",
       placeLoading: "Loading place information…",
       placeUnknown: "Selected place",
@@ -359,6 +361,7 @@
     mapLongPressStartPoint: null,
     mapLongPressTriggered: false,
     placeRequestController: null,
+    placePanelReturnTarget: null,
     exploreMarkers: [],
     exploreRequestController: null,
     favorites: readFavorites()
@@ -389,6 +392,7 @@
     placePanel: $("place-panel"),
     placeSheetHandle: $("place-sheet-handle"),
     placePanelTitle: $("place-panel-title"),
+    placePanelBack: $("place-panel-back"),
     placePanelClose: $("place-panel-close"),
     placePanelContent: $("place-panel-content"),
     favoritesCount: $("favorites-count"),
@@ -554,6 +558,10 @@
   });
   el.legendButton?.addEventListener("click", toggleLegend);
   el.legendClose?.addEventListener("click", closeLegend);
+  el.placePanelBack?.addEventListener(
+    "click",
+    returnFromPlacePanel
+  );
   el.placePanelClose?.addEventListener("click", closePlacePanel);
 
   el.menuButton?.addEventListener("click", toggleMenu);
@@ -1279,6 +1287,9 @@
           });
 
           window.OMAP_SEARCH_SESSION?.cancel?.();
+          setPlacePanelReturnTarget("search", {
+            query: el.searchInput?.value || label
+          });
           showSelectedPlaceInformation(result);
 
           map.flyTo({
@@ -1502,6 +1513,10 @@
             entry.provider === "named-poi" ||
             Boolean(entry.namedPoiId) ||
             Boolean(entry.osm_type && entry.osm_id);
+
+          setPlacePanelReturnTarget("search", {
+            query: el.searchInput?.value || entry.label
+          });
 
           if (isExactPlace) {
             showSelectedPlaceInformation({
@@ -2630,10 +2645,13 @@ el.discoverButton?.setAttribute(
     );
   }
 
-  function closeDiscover() {
+  function closeDiscover(clearResults = true) {
     if (el.discoverPanel.hidden) return;
 
-    clearDiscoverResults();
+    if (clearResults) {
+      clearDiscoverResults();
+    }
+
     el.discoverPanel.hidden = true;
     el.discoverButton?.setAttribute("aria-expanded", "false");
     el.discoverButton?.classList.remove("is-active");
@@ -3354,11 +3372,101 @@ function closeRoute() {
     });
   }
 
+
+  function setPlacePanelReturnTarget(type, data = {}) {
+    state.placePanelReturnTarget = type
+      ? { type, ...data }
+      : null;
+
+    if (el.placePanelBack) {
+      el.placePanelBack.hidden =
+        !state.placePanelReturnTarget;
+    }
+  }
+
+  function clearPlacePanelReturnTarget() {
+    state.placePanelReturnTarget = null;
+
+    if (el.placePanelBack) {
+      el.placePanelBack.hidden = true;
+    }
+  }
+
+  function reopenSearchResults(query) {
+    if (!el.searchInput) return;
+
+    if (query) {
+      el.searchInput.value = query;
+      updateSearchClearButton();
+    }
+
+    window.requestAnimationFrame(() => {
+      el.searchInput.focus();
+      el.searchInput.dispatchEvent(
+        new Event("input", { bubbles: true })
+      );
+    });
+  }
+
+  function reopenDiscoverPanel() {
+    if (!el.discoverPanel) return;
+
+    el.discoverPanel.hidden = false;
+    el.discoverPanel.classList.remove("is-collapsed");
+
+    if (window.matchMedia("(max-width: 600px)").matches) {
+      const height = window.innerHeight * 0.42;
+      el.discoverPanel.style.setProperty(
+        "--discover-sheet-height",
+        `${height}px`
+      );
+      document.documentElement.style.setProperty(
+        "--discover-sheet-height",
+        `${height}px`
+      );
+    }
+
+    el.discoverButton?.setAttribute(
+      "aria-expanded",
+      "true"
+    );
+    el.discoverButton?.classList.add("is-active");
+    el.mobileDiscoverButton?.setAttribute(
+      "aria-expanded",
+      "true"
+    );
+    el.mobileDiscoverButton?.classList.add("is-active");
+  }
+
+  function returnFromPlacePanel() {
+    const target = state.placePanelReturnTarget;
+
+    closePlacePanel();
+
+    if (!target) return;
+
+    if (target.type === "favorites") {
+      openFavoritesPanel();
+      return;
+    }
+
+    if (target.type === "discover") {
+      reopenDiscoverPanel();
+      return;
+    }
+
+    if (target.type === "search") {
+      reopenSearchResults(target.query || "");
+    }
+  }
+
   function openPlacePanel() {
     closeMenu();
     closeLegend();
     closeAbout();
-    closeDiscover();
+    closeDiscover(
+      state.placePanelReturnTarget?.type !== "discover"
+    );
     closeFavoritesPanel();
     closeRoutePanel();
 
@@ -3376,6 +3484,7 @@ function closeRoute() {
     state.placePanelLngLat = null;
     state.selectedPlace = null;
     state.placePopup = null;
+    clearPlacePanelReturnTarget();
     removeSelectedPlaceMarker();
 
     if (el.placePanel) {
@@ -3396,6 +3505,7 @@ function closeRoute() {
   // Wywoływana tylko dla świadomie wybranego miejsca.
   async function showPlaceInformation(event) {
     window.OMAP_SEARCH_SESSION?.cancel?.();
+    clearPlacePanelReturnTarget();
 
     const guardId = state.namedPoiGuardId;
 
@@ -5757,6 +5867,8 @@ function closeRoute() {
           (favorite.osm_type && favorite.osm_id)
         );
 
+        setPlacePanelReturnTarget("favorites");
+
         if (hasExactIdentity) {
           showSelectedPlaceInformation({
             ...favorite,
@@ -6291,7 +6403,13 @@ el.menuButton.setAttribute("aria-expanded", String(shouldOpen));
         return;
       }
 
-      renderDiscoverResults(places, category);
+      renderDiscoverResults(
+        places,
+        {
+          ...category,
+          id: categoryId
+        }
+      );
       el.discoverStatus.textContent =
         t.discoverFound(places.length);
       if (el.discoverClear) el.discoverClear.hidden = false;
@@ -6361,15 +6479,58 @@ el.menuButton.setAttribute("aria-expanded", String(shouldOpen));
         seen.add(key);
 
         collected.push({
+          id: item.osm_id || "",
+          type: item.osm_type || "",
           lat,
           lon,
+          category: item.category || "",
+          placeClass: item.class || "",
+          placeType: item.type || "",
           tags: {
+            ...(item.extratags || {}),
             name:
+              item.namedetails?.["name:pl"] ||
               item.namedetails?.name ||
               item.name ||
               getSearchResultTitle(item) ||
               item.display_name,
-            brand: item.extratags?.brand || ""
+            brand:
+              item.extratags?.brand ||
+              "",
+            amenity:
+              item.extratags?.amenity ||
+              (
+                item.class === "amenity"
+                  ? item.type
+                  : ""
+              ),
+            shop:
+              item.extratags?.shop ||
+              (
+                item.class === "shop"
+                  ? item.type
+                  : ""
+              ),
+            tourism:
+              item.extratags?.tourism ||
+              (
+                item.class === "tourism"
+                  ? item.type
+                  : ""
+              ),
+            leisure:
+              item.extratags?.leisure ||
+              (
+                item.class === "leisure"
+                  ? item.type
+                  : ""
+              )
+          },
+          address: {
+            ...(item.address || {})
+          },
+          namedetails: {
+            ...(item.namedetails || {})
           }
         });
 
@@ -6403,13 +6564,68 @@ el.menuButton.setAttribute("aria-expanded", String(shouldOpen));
       seen.add(key);
 
       results.push({
+        id: element.id || "",
+        type: element.type || "",
         lat,
         lon,
-        tags: element.tags || {}
+        category: "",
+        placeClass: "",
+        placeType: "",
+        tags: {
+          ...(element.tags || {})
+        },
+        address: {},
+        namedetails: {}
       });
     }
 
     return results;
+  }
+
+
+  function getDiscoverPlaceClassification(
+    place,
+    category
+  ) {
+    const tags = place.tags || {};
+
+    const type =
+      place.placeType ||
+      tags.amenity ||
+      tags.shop ||
+      tags.tourism ||
+      tags.leisure ||
+      tags.railway ||
+      tags.natural ||
+      category.id ||
+      "";
+
+    const placeClass =
+      place.placeClass ||
+      (
+        tags.amenity
+          ? "amenity"
+          : tags.shop
+            ? "shop"
+            : tags.tourism
+              ? "tourism"
+              : tags.leisure
+                ? "leisure"
+                : tags.railway
+                  ? "railway"
+                  : tags.natural
+                    ? "natural"
+                    : ""
+      );
+
+    return {
+      type,
+      class: placeClass,
+      category:
+        place.category ||
+        category.id ||
+        type
+    };
   }
 
   function renderDiscoverResults(places, category) {
@@ -6435,6 +6651,13 @@ el.menuButton.setAttribute("aria-expanded", String(shouldOpen));
         .addTo(map);
 
       const openPlace = () => {
+        const classification =
+          getDiscoverPlaceClassification(
+            place,
+            category
+          );
+
+        setPlacePanelReturnTarget("discover");
         showSelectedPlaceInformation({
             place_id: `discover:${place.type || "node"}:${place.id || index}`,
             osm_type: place.type || "",
@@ -6449,27 +6672,30 @@ el.menuButton.setAttribute("aria-expanded", String(shouldOpen));
               place.tags.name ||
               place.tags.brand ||
               "",
-            class:
-              place.tags.amenity
-                ? "amenity"
-                : place.tags.shop
-                  ? "shop"
-                  : place.tags.tourism
-                    ? "tourism"
-                    : "",
-            type:
-              place.tags.amenity ||
-              place.tags.shop ||
-              place.tags.tourism ||
-              place.tags.leisure ||
-              category.id ||
-              "",
+            class: classification.class,
+            type: classification.type,
+            category: classification.category,
             address: {
-              road: place.tags["addr:street"] || "",
-              house_number: place.tags["addr:housenumber"] || "",
-              city: place.tags["addr:city"] || ""
+              ...(place.address || {}),
+              road:
+                place.tags["addr:street"] ||
+                place.address?.road ||
+                "",
+              house_number:
+                place.tags["addr:housenumber"] ||
+                place.address?.house_number ||
+                "",
+              city:
+                place.tags["addr:city"] ||
+                place.address?.city ||
+                ""
             },
-            extratags: { ...place.tags }
+            extratags: {
+              ...place.tags
+            },
+            namedetails: {
+              ...(place.namedetails || {})
+            }
           });
 
         map.easeTo({
@@ -7065,6 +7291,9 @@ el.menuButton.setAttribute("aria-expanded", String(shouldOpen));
       session.assertActive();
 
       // Panel otrzymuje zamrożony wynik sesji.
+      setPlacePanelReturnTarget("search", {
+        query: q
+      });
       showSelectedPlaceInformation(result);
 
       map.flyTo({
