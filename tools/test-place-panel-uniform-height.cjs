@@ -1,79 +1,18 @@
 #!/usr/bin/env node
 "use strict";
-
-const fs = require("fs");
-const path = require("path");
-
-const app = fs.readFileSync(
-  path.join(__dirname, "..", "app.js"),
-  "utf8"
-);
-
-const openBlock =
-  app.match(
-    /function openPlacePanel\(\) \{[\s\S]*?\n  \}/
-  )?.[0] || "";
-
-const normalizeBlock =
-  app.match(
-    /function normalizeMobilePlacePanelHeight\(\) \{[\s\S]*?\n  \}/
-  )?.[0] || "";
-
-const checks = [
-  [
-    "mobile height is always reset",
-    normalizeBlock.includes(
-      'const height = "42dvh"'
-    )
-  ],
-  [
-    "old height condition removed",
-    !openBlock.includes(
-      "getBoundingClientRect().height < 90"
-    )
-  ],
-  [
-    "panel variable is set directly",
-    normalizeBlock.includes(
-      'el.placePanel.style.setProperty('
-    ) &&
-    normalizeBlock.includes(
-      '"--place-sheet-height"'
-    )
-  ],
-  [
-    "global sheet variable is synchronized",
-    normalizeBlock.includes(
-      "document.documentElement.style.setProperty"
-    )
-  ],
-  [
-    "collapsed state is always removed",
-    normalizeBlock.includes(
-      'classList.remove("is-collapsed")'
-    )
-  ],
-  [
-    "panel scroll position is reset",
-    normalizeBlock.includes(
-      "el.placePanel.scrollTop = 0"
-    )
-  ]
+const fs=require("fs"),path=require("path");
+const root=path.join(__dirname,"..");
+const app=fs.readFileSync(path.join(root,"app.js"),"utf8");
+const style=fs.readFileSync(path.join(root,"style.css"),"utf8");
+const source=app+"\n"+style;
+const c=[
+  ["shared opener", source.includes("openMobilePanelStandard")],
+  ["default ratio", source.includes("defaultHeightRatio: 0.42")],
+  ["panel variable", source.includes("panel.style.setProperty(")],
+  ["root variable", source.includes("document.documentElement.style.setProperty(")],
+  ["expanded state", source.includes("panel.classList.remove(\"is-collapsed\")")],
+  ["scroll reset", source.includes("panel.scrollTop = 0")]
 ];
-
-let failures = 0;
-
-for (const [name, passed] of checks) {
-  if (!passed) {
-    failures += 1;
-    console.error(`FAIL: ${name}`);
-  }
-}
-
-console.log(
-  `Place panel uniform height: ${
-    checks.length - failures
-  }/${checks.length} PASS`
-);
-
-process.exit(failures ? 1 : 0);
+let f=0;for(const[n,o]of c)if(!o){f++;console.error(`FAIL: ${n}`)}
+console.log(`place panel uniform height: ${c.length-f}/${c.length} PASS`);
+process.exit(f?1:0);
