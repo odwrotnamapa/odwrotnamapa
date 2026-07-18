@@ -1,6 +1,6 @@
 window.OMAP_SEARCH_V2_LOCATIONS_PL = {
   "version": 1,
-  "generatedAt": "2026-07-18T08:29:51.974Z",
+  "generatedAt": "2026-07-18T08:44:49.526Z",
   "country": {
     "id": "pl",
     "name": "Polska",
