@@ -16,7 +16,7 @@ const c=[
 ["universal CSS",style.includes("--mobile-panel-default-height: 42dvh")],
 ["all current panels",[".route-panel:not([hidden])",".discover-panel:not([hidden])",".menu-panel:not([hidden])",".favorites-panel:not([hidden])",".place-panel:not([hidden])",".menu-subpanel:not([hidden])"].every(x=>style.includes(x))],
 ["collapsed CSS",style.includes(".route-panel.is-collapsed")&&style.includes(".place-panel.is-collapsed")],
-["back navigation preserved",app.includes('target.type === "favorites"')&&app.includes('target.type === "discover"')&&app.includes('target.type === "search"')],
+["back navigation preserved",app.includes('OMAP_BACK_NAVIGATION?.register(\n    "favorites"')&&app.includes('OMAP_BACK_NAVIGATION?.register(\n    "discover"')&&app.includes('OMAP_BACK_NAVIGATION?.register(\n    "search"')],
 ["legend standardized",app.includes("initializeLegendBottomSheet")&&style.includes("--legend-sheet-height")],
 ["about standardized",app.includes("initializeAboutBottomSheet")&&style.includes("--about-sheet-height")]];
 let f=0;for(const[n,o]of c)if(!o){f++;console.error(`FAIL: ${n}`)}
