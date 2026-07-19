@@ -4739,11 +4739,6 @@ textarea,
     mask-image: none !important;
     -webkit-mask-image: none !important;
   }
-
-  #legend-panel,
-  #about-panel {
-    overflow: hidden !important;
-  }
 }
 
 /* Bez wyjątków: wszystkie elementy interfejsu mają rogi 0 px. */
