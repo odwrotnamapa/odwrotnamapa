@@ -57,7 +57,7 @@ button, input, select {
 
 .brand {
   display: flex;
-  gap: 9px;
+  gap: 2px;
   align-items: center;
   min-height: 46px;
   padding: 8px 13px;
