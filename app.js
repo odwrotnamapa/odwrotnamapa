@@ -2097,21 +2097,6 @@
     );
   }
 
-  function getPrimaryPlaceName(result) {
-    const address = result.address || {};
-
-    return (
-      address.city ||
-      address.town ||
-      address.village ||
-      address.municipality ||
-      address.hamlet ||
-      address.suburb ||
-      result.name ||
-      ""
-    );
-  }
-
   function normalizeSearchText(value) {
     return String(value || "")
       .normalize("NFD")
