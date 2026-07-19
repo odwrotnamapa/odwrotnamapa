@@ -563,6 +563,7 @@
     applyLanguageAfterStartup();
     loadSharedRouteFromUrl();
     loadSharedPlaceFromUrl();
+    initializeGeoUriHandling();
   });
 
   map.on("moveend", saveView);
@@ -5996,6 +5997,39 @@ function closeRoute() {
     refreshWaypointMarkers();
     await calculateRouteFromStoredPoints();
   }
+
+function openGeoUri(rawUrl) {
+  const match = /^geo:([^;?]+)/i.exec(String(rawUrl || ""));
+  if (!match) return;
+
+  const point = parseSharedPoint(decodeURIComponent(match[1]));
+  if (!point) return;
+
+  showPlaceInformation({
+    lngLat: new maplibregl.LngLat(point.lon, point.lat)
+  });
+
+  map.flyTo({
+    center: [point.lon, point.lat],
+    zoom: 17,
+    bearing: 180
+  });
+}
+
+function initializeGeoUriHandling() {
+  window.omapHandleGeoUri = openGeoUri;
+
+  const capacitorApp = window.CapacitorApp;
+  if (!capacitorApp) return;
+
+  capacitorApp.addListener("appUrlOpen", event => {
+    openGeoUri(event?.url);
+  });
+
+  capacitorApp.getLaunchUrl?.()
+    .then(result => openGeoUri(result?.url))
+    .catch(() => {});
+}
 
   function parseSharedPoint(value) {
     if (!value) return null;

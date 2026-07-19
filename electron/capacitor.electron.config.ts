@@ -1,0 +1,61 @@
+import { defineConfig } from '@capawesome/capacitor-electron/config';
+import { app, Menu, BrowserWindow } from 'electron';
+
+function findGeoArg(argv: string[]): string | null {
+  return argv.find(arg => arg.startsWith('geo:')) || null;
+}
+
+let pendingGeoUri: string | null = findGeoArg(process.argv);
+let mainWindowRef: BrowserWindow | null = null;
+
+function deliverGeoUri(uri: string | null): void {
+  if (!uri || !mainWindowRef) return;
+  mainWindowRef.webContents
+    .executeJavaScript(
+      `window.omapHandleGeoUri && window.omapHandleGeoUri(${JSON.stringify(uri)});`
+    )
+    .catch(() => {});
+}
+
+app.on('second-instance', (_event, argv: string[]) => {
+  const uri = findGeoArg(argv);
+  if (uri) deliverGeoUri(uri);
+});
+
+export default defineConfig({
+  window: {
+    width: 1200,
+    height: 800,
+    minWidth: 800,
+    minHeight: 600,
+  },
+  csp: {
+    policy: [
+      "default-src 'self'",
+      "script-src 'self' https://cdn.jsdelivr.net",
+      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net",
+      "font-src 'self' https://fonts.gstatic.com",
+      "img-src 'self' data: blob: https://tiles.openfreemap.org https://server.arcgisonline.com",
+      "connect-src 'self' https://tiles.openfreemap.org https://server.arcgisonline.com https://nominatim.openstreetmap.org https://photon.komoot.io https://valhalla1.openstreetmap.de https://api.transitous.org",
+      "worker-src 'self' blob:",
+      "child-src blob:",
+    ].join('; '),
+  },
+  deepLinks: {
+    scheme: 'geo',
+  },
+  hooks: {
+    beforeReady: () => {
+      Menu.setApplicationMenu(null);
+    },
+    onWindowCreated: window => {
+      mainWindowRef = window;
+      window.webContents.on('did-finish-load', () => {
+        if (pendingGeoUri) {
+          deliverGeoUri(pendingGeoUri);
+          pendingGeoUri = null;
+        }
+      });
+    },
+  },
+});
