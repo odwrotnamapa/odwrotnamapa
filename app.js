@@ -593,25 +593,25 @@
     });
 
   function refreshDefaultThemeIfNeeded() {
-    if (state.theme === "default") applyTheme(state.theme);
+    if (state.theme !== "default") return;
+    // Only re-apply when the resolved light/dark result actually changed,
+    // so this can never turn into a repeating loop no matter what triggers it.
+    if (resolveTheme(state.theme) === lastResolvedTheme) return;
+    applyTheme(state.theme);
   }
 
   if (window.MutationObserver) {
     new MutationObserver(refreshDefaultThemeIfNeeded).observe(
       document.documentElement,
-      { attributes: true, attributeFilter: ["data-darkreader-scheme", "class"] }
-    );
-    new MutationObserver(refreshDefaultThemeIfNeeded).observe(
-      document.head,
-      { childList: true }
+      { attributes: true, attributeFilter: ["data-darkreader-scheme"] }
     );
   }
 
-  // Dark-mode browser extensions (e.g. Dark Reader) often apply a moment
-  // after the page finishes loading, so re-check a few times early on.
-  [300, 800, 1600, 3000].forEach(delay => {
-    window.setTimeout(refreshDefaultThemeIfNeeded, delay);
-  });
+  // Dark-mode browser extensions (e.g. Dark Reader) can be toggled by the
+  // user at any time without a page reload, so poll for that periodically.
+  // This is safe even if it fires often: refreshDefaultThemeIfNeeded()
+  // only does anything when the resolved theme actually changed.
+  window.setInterval(refreshDefaultThemeIfNeeded, 2500);
 
   el.languageSelect?.addEventListener("change", e => {
     state.language = e.target.value;
@@ -915,37 +915,45 @@
       return darkModeProbe;
     }
 
-    const probe = document.createElement("div");
-    probe.id = "omap-dark-mode-probe";
-    probe.setAttribute("aria-hidden", "true");
-    probe.style.cssText =
-      "position:fixed;top:-9999px;left:-9999px;width:1px;height:1px;" +
-      "background-color:#ffffff;pointer-events:none;";
-    document.body.appendChild(probe);
-    darkModeProbe = probe;
-    return probe;
+    try {
+      const probe = document.createElement("div");
+      probe.id = "omap-dark-mode-probe";
+      probe.setAttribute("aria-hidden", "true");
+      probe.style.cssText =
+        "position:fixed;top:-9999px;left:-9999px;width:1px;height:1px;" +
+        "background-color:#ffffff;pointer-events:none;";
+      document.body.appendChild(probe);
+      darkModeProbe = probe;
+      return probe;
+    } catch (_) {
+      return null;
+    }
   }
 
   function detectBrowserForcedDarkMode() {
-    if (!document.body) return false;
+    try {
+      if (!document.body) return false;
 
-    // Dark Reader marks the page with this attribute when active.
-    const scheme = document.documentElement.getAttribute(
-      "data-darkreader-scheme"
-    );
-    if (scheme) return scheme !== "light";
+      // Dark Reader marks the page with this attribute when active.
+      const scheme = document.documentElement.getAttribute(
+        "data-darkreader-scheme"
+      );
+      if (scheme) return scheme !== "light";
 
-    // Generic fallback: dark-mode extensions (Dark Reader and similar)
-    // recolor the whole page, including inline styles. A probe element
-    // with an explicit white background will come back dark if such an
-    // extension is active.
-    const background = getComputedStyle(getDarkModeProbe()).backgroundColor;
-    const channels = background?.match(/[\d.]+/g);
-    if (!channels || channels.length < 3) return false;
+      // Generic fallback: dark-mode extensions (Dark Reader and similar)
+      // recolor the whole page, including inline styles. A probe element
+      // with an explicit white background will come back dark if such an
+      // extension is active.
+      const background = getComputedStyle(getDarkModeProbe()).backgroundColor;
+      const channels = background?.match(/[\d.]+/g);
+      if (!channels || channels.length < 3) return false;
 
-    const [r, g, b] = channels.map(Number);
-    const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-    return luminance < 0.5;
+      const [r, g, b] = channels.map(Number);
+      const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+      return luminance < 0.5;
+    } catch (_) {
+      return false;
+    }
   }
 
   function prefersDarkColorScheme() {
@@ -963,6 +971,8 @@
     return theme;
   }
 
+  let lastResolvedTheme = null;
+
   function applyTheme(theme) {
     if (!map.isStyleLoaded()) {
       map.once("idle", () => applyTheme(theme));
@@ -970,6 +980,7 @@
     }
 
     const effectiveTheme = resolveTheme(theme);
+    lastResolvedTheme = effectiveTheme;
     const layers = map.getStyle().layers || [];
 
     for (const layer of layers) {
