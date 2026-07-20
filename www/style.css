@@ -653,6 +653,73 @@ body.ui-dark .legend-symbol.osm-buildings {
   color: var(--accent);
 }
 
+.about-donate {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 18px 0 0;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+}
+
+.about-donate-heading {
+  margin: 0;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  color: var(--muted);
+}
+
+.about-donate-coffee {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  color: var(--text);
+  text-decoration: none;
+  font-size: 0.82rem;
+}
+
+.about-donate-coffee:hover,
+.about-donate-coffee:focus-visible {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.about-donate-btc {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: flex-start;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.about-donate-btc:hover,
+.about-donate-btc:focus-visible {
+  border-color: var(--accent);
+}
+
+.about-donate-btc-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.82rem;
+}
+
+.about-donate-btc code {
+  font-size: 0.68rem;
+  color: var(--muted);
+  word-break: break-all;
+}
+
 @media (max-width: 480px) {
   .about-panel,
   .backup-panel {

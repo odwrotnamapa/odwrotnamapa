@@ -68,6 +68,10 @@
       aboutStyle: "Styl mapy",
       aboutEngine: "Silnik",
       aboutContact: "Kontakt:",
+      aboutDonateHeading: "Wesprzyj projekt",
+      aboutDonateCoffee: "Buy Me a Coffee",
+      aboutDonateBtc: "Bitcoin",
+      aboutDonateBtcCopied: "Skopiowano adres Bitcoin.",
       searching: "Wyszukiwanie…", noResults: "Nie znaleziono miejsca.",
       searchError: "Nie udało się wyszukać miejsca.",
       locating: "Ustalanie lokalizacji…",
@@ -278,6 +282,10 @@
       aboutStyle: "Map style",
       aboutEngine: "Engine",
       aboutContact: "Contact:",
+      aboutDonateHeading: "Support the project",
+      aboutDonateCoffee: "Buy Me a Coffee",
+      aboutDonateBtc: "Bitcoin",
+      aboutDonateBtcCopied: "Bitcoin address copied.",
       searching: "Searching…", noResults: "No place found.",
       searchError: "The place search failed.",
       locating: "Finding your location…",
@@ -590,6 +598,12 @@
     aboutStyleLabel: $("about-style-label"),
     aboutEngineLabel: $("about-engine-label"),
     aboutContactLabel: $("about-contact-label"),
+    aboutDonateHeading: $("about-donate-heading"),
+    aboutDonateCoffee: $("about-donate-coffee-label"),
+    aboutDonateCoffeeLink: document.querySelector(".about-donate-coffee"),
+    aboutDonateBtcHeading: $("about-donate-btc-heading"),
+    aboutDonateBtcButton: $("about-donate-btc"),
+    aboutDonateBtcAddress: $("about-donate-btc-address"),
     routeButton: $("route-button"),
     discoverButton: $("discover-button"),
     discoverSheetHandle: $("discover-sheet-handle"),
@@ -896,6 +910,14 @@
 
   el.aboutButton?.addEventListener("click", toggleAbout);
   el.aboutClose?.addEventListener("click", closeAbout);
+
+  el.aboutDonateBtcButton?.addEventListener("click", () => {
+    const address = el.aboutDonateBtcAddress?.textContent?.trim();
+    if (address) {
+      copyValue(address, text[state.language].aboutDonateBtcCopied);
+    }
+  });
+
   el.aboutBack?.addEventListener(
     "click",
     returnFromAboutToMenu
@@ -1017,6 +1039,9 @@
     if (el.aboutStyleLabel) el.aboutStyleLabel.textContent = t.aboutStyle;
     if (el.aboutEngineLabel) el.aboutEngineLabel.textContent = t.aboutEngine;
     if (el.aboutContactLabel) el.aboutContactLabel.textContent = t.aboutContact;
+    if (el.aboutDonateHeading) el.aboutDonateHeading.textContent = t.aboutDonateHeading;
+    if (el.aboutDonateCoffee) el.aboutDonateCoffee.textContent = t.aboutDonateCoffee;
+    if (el.aboutDonateBtcHeading) el.aboutDonateBtcHeading.textContent = t.aboutDonateBtc;
     if (el.placePanelTitle) el.placePanelTitle.textContent = t.placePanelTitle;
     el.placePanelClose?.setAttribute("aria-label", t.placePanelClose);
     el.placeSheetHandle?.setAttribute("aria-label", t.placePanelResize);
