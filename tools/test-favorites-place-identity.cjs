@@ -33,7 +33,7 @@ const checks = [
   ],
   [
     "export preserves identity",
-    app.includes("favorites: state.favorites.map(favorite => ({") &&
+    app.includes("payload.favorites = state.favorites.map(favorite => ({") &&
     app.includes("...favorite")
   ],
   [

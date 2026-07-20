@@ -61,6 +61,8 @@
       legendNote: "Legenda oparta na stylu Liberty OpenFreeMap. Wygląd symboli i kolorów może różnić się w zależności od wybranego motywu mapy.",
       about: "O projekcie",
       closeAbout: "Zamknij sekcję O projekcie",
+      backupTitle: "Kopia zapasowa",
+      closeBackup: "Zamknij kopię zapasową",
       aboutIntro: "Większość współczesnych map przedstawia północ na górze, więc łatwo zapomnieć, że nie jest to prawo natury, lecz historyczna konwencja. Odwrotna Mapa zachęca do spojrzenia na świat z innej perspektywy — i to dosłownie — oraz przypomina, że sposób przedstawiania rzeczywistości znacząco wpływa na to, jak ją postrzegamy.",
       aboutData: "Dane mapowe",
       aboutStyle: "Styl mapy",
@@ -158,6 +160,12 @@
       favoritesCountLabel: "zapisanych miejsc",
       menuExportAll: "Eksportuj JSON",
       menuImportAll: "Importuj JSON",
+      backupSelectAll: "Zaznacz wszystko",
+      backupDeselectAll: "Odznacz wszystko",
+      backupScopeFavorites: "Ulubione miejsca",
+      backupScopeColors: "Kolory",
+      colorsImported: "Zaimportowano kolory.",
+      backupNothingSelected: "Zaznacz przynajmniej jedną opcję.",
       favoritesClose: "Zamknij Ulubione",
       favoritesNoMatch: "Brak pasujących ulubionych.",
       favoritesImported: count => `Zaimportowano ${count} miejsc.`,
@@ -166,6 +174,7 @@
       menuLocation: "Moja lokalizacja",
       menuLanguage: "Język",
       menuLegend: "Legenda",
+      menuBackup: "Kopia zapasowa",
       menuAbout: "O projekcie",
       contextRouteA: "Ustaw jako punkt A",
       contextRouteB: "Ustaw jako punkt B",
@@ -261,6 +270,8 @@
       legendNote: "Legend based on the OpenFreeMap Liberty style. The appearance of symbols and colours may vary depending on the selected map theme.",
       about: "About",
       closeAbout: "Close the About panel",
+      backupTitle: "Backup",
+      closeBackup: "Close backup",
       aboutIntro: "Most modern maps place north at the top. This is not, however, the only possible way to represent the world. Odwrotna Mapa was created as an attempt to look at a familiar map from another perspective and to encourage reflection on how conventions influence our perception of reality.",
       aboutData: "Map data",
       aboutStyle: "Map style",
@@ -358,6 +369,12 @@
       favoritesCountLabel: "saved places",
       menuExportAll: "Export JSON",
       menuImportAll: "Import JSON",
+      backupSelectAll: "Select all",
+      backupDeselectAll: "Deselect all",
+      backupScopeFavorites: "Favorite places",
+      backupScopeColors: "Colors",
+      colorsImported: "Colors imported.",
+      backupNothingSelected: "Select at least one option.",
       favoritesClose: "Close Favorites",
       favoritesNoMatch: "No matching favorites.",
       favoritesImported: count => `Imported ${count} places.`,
@@ -366,6 +383,7 @@
       menuLocation: "My location",
       menuLanguage: "Language",
       menuLegend: "Legend",
+      menuBackup: "Backup",
       menuAbout: "About",
       contextRouteA: "Set as Point A",
       contextRouteB: "Set as Point B",
@@ -535,6 +553,11 @@
     menuImportAllButton: $("menu-import-all-button"),
     menuImportAllLabel: $("menu-import-all-label"),
     menuImportAllInput: $("menu-import-all-input"),
+    backupSelectAll: $("menu-backup-select-all"),
+    backupScopeFavorites: $("menu-backup-scope-favorites"),
+    backupScopeFavoritesLabel: $("menu-backup-scope-favorites-label"),
+    backupScopeColors: $("menu-backup-scope-colors"),
+    backupScopeColorsLabel: $("menu-backup-scope-colors-label"),
     menuThemeLabel: $("menu-theme-label"),
     menuLanguageSelect: $("menu-language-select"),
     menuLegendButton: $("menu-legend-button"),
@@ -552,7 +575,14 @@
     aboutSheetHandle: $("about-sheet-handle"),
     aboutClose: $("about-close"),
     aboutBack: $("about-back"),
+    menuBackupButton: $("menu-backup-button"),
+    menuBackupLabel: $("menu-backup-label"),
+    backupPanel: $("backup-panel"),
+    backupSheetHandle: $("backup-sheet-handle"),
+    backupClose: $("backup-close"),
+    backupBack: $("backup-back"),
     aboutTitle: $("about-title"),
+    backupTitle: $("backup-title"),
     aboutIntro: $("about-intro"),
     aboutDataLabel: $("about-data-label"),
     aboutStyleLabel: $("about-style-label"),
@@ -806,6 +836,33 @@
     el.menuImportAllInput?.click();
   });
   el.menuImportAllInput?.addEventListener("change", importAllSettingsJson);
+  el.backupSelectAll?.addEventListener("click", () => {
+    const checkboxes = [el.backupScopeFavorites, el.backupScopeColors].filter(Boolean);
+    const allChecked = checkboxes.every(box => box.checked);
+    for (const box of checkboxes) box.checked = !allChecked;
+    updateBackupSelectAllLabel();
+  });
+  el.backupScopeFavorites?.addEventListener("change", updateBackupSelectAllLabel);
+  el.backupScopeColors?.addEventListener("change", updateBackupSelectAllLabel);
+
+  function updateBackupSelectAllLabel() {
+    if (!el.backupSelectAll) return;
+    const checkboxes = [el.backupScopeFavorites, el.backupScopeColors].filter(Boolean);
+    const allChecked = checkboxes.every(box => box.checked);
+    el.backupSelectAll.textContent = allChecked
+      ? text[state.language].backupDeselectAll
+      : text[state.language].backupSelectAll;
+  }
+
+  updateBackupSelectAllLabel();
+
+  function getCheckedBackupScopes() {
+    const scopes = [];
+    if (el.backupScopeFavorites?.checked) scopes.push("favorites");
+    if (el.backupScopeColors?.checked) scopes.push("colors");
+    return scopes;
+  }
+
   el.menuLocationButton?.addEventListener("click", locateFromMenu);
   el.menuThemeSelect?.addEventListener("change", () => {
     if (!el.themeSelect) return;
@@ -821,6 +878,16 @@
   el.menuAboutButton?.addEventListener(
     "click",
     openAboutFromMenu
+  );
+
+  el.menuBackupButton?.addEventListener(
+    "click",
+    openBackupFromMenu
+  );
+  el.backupClose?.addEventListener("click", closeBackup);
+  el.backupBack?.addEventListener(
+    "click",
+    returnFromBackupToMenu
   );
 
   el.aboutButton?.addEventListener("click", toggleAbout);
@@ -868,11 +935,13 @@
   initializePlaceBottomSheet();
   initializeLegendBottomSheet();
   initializeAboutBottomSheet();
+  initializeBackupBottomSheet();
   initializeAutocomplete();
   document.addEventListener("keydown", event => {
     if (event.key === "Escape") {
       closeLegend();
       closeAbout();
+      closeBackup();
       closeDiscover();
       closeMapContextMenu();
       closeMenu();
@@ -905,10 +974,14 @@
     if (el.menuLanguageLabel) el.menuLanguageLabel.textContent = t.menuLanguage;
     if (el.clearMapLabel) el.clearMapLabel.textContent = t.clearMap;
     if (el.menuAboutLabel) el.menuAboutLabel.textContent = t.menuAbout;
+    if (el.menuBackupLabel) el.menuBackupLabel.textContent = t.menuBackup;
     if (el.favoritesMenuLabel) el.favoritesMenuLabel.textContent = t.favoritesTitle;
     if (el.favoritesTitle) el.favoritesTitle.textContent = t.favoritesTitle;
     if (el.menuExportAllLabel) el.menuExportAllLabel.textContent = t.menuExportAll;
     if (el.menuImportAllLabel) el.menuImportAllLabel.textContent = t.menuImportAll;
+    if (el.backupScopeFavoritesLabel) el.backupScopeFavoritesLabel.textContent = t.backupScopeFavorites;
+    if (el.backupScopeColorsLabel) el.backupScopeColorsLabel.textContent = t.backupScopeColors;
+    updateBackupSelectAllLabel();
     if (el.favoritesCountLabel) el.favoritesCountLabel.textContent = t.favoritesCountLabel;
     document.documentElement.lang = state.language;
     document.title = t.title;
@@ -926,12 +999,15 @@
     el.legendClose?.setAttribute("aria-label", t.closeLegend);
     el.legendBack?.setAttribute("aria-label", t.backToMenu);
     el.aboutBack?.setAttribute("aria-label", t.backToMenu);
+    el.backupBack?.setAttribute("aria-label", t.backToMenu);
     el.favoritesBack?.setAttribute("aria-label", t.backToMenu);
     if (el.legendNote) el.legendNote.textContent = t.legendNote;
     if (el.aboutButton) el.aboutButton.title = t.about;
     el.aboutButton?.setAttribute("aria-label", t.about);
     if (el.aboutTitle) el.aboutTitle.textContent = t.about;
     el.aboutClose?.setAttribute("aria-label", t.closeAbout);
+    if (el.backupTitle) el.backupTitle.textContent = t.backupTitle;
+    el.backupClose?.setAttribute("aria-label", t.closeBackup);
     if (el.aboutIntro) el.aboutIntro.textContent = t.aboutIntro;
     if (el.aboutDataLabel) el.aboutDataLabel.textContent = t.aboutData;
     if (el.aboutStyleLabel) el.aboutStyleLabel.textContent = t.aboutStyle;
@@ -3121,6 +3197,15 @@
     });
   }
 
+  function initializeBackupBottomSheet() {
+    initializeBottomSheet({
+      panel: el.backupPanel,
+      handle: el.backupSheetHandle,
+      close: closeBackup,
+      cssVariable: "--backup-sheet-height"
+    });
+  }
+
 
   function toggleDiscover() {
     closeMapContextMenu();
@@ -3131,6 +3216,7 @@
 
     closeLegend();
     closeAbout();
+    closeBackup();
     closeDiscover();
     closeRoute();
 
@@ -3173,6 +3259,7 @@ el.discoverButton?.setAttribute(
     closePlacePopup();
     closeLegend();
     closeAbout();
+    closeBackup();
     el.routePanel.hidden = !shouldOpen;
     if (shouldOpen) {
       openMobilePanelStandard(el.routePanel, "--route-sheet-height");
@@ -3996,6 +4083,7 @@ function closeRoute() {
     closeMenu();
     closeLegend();
     closeAbout();
+    closeBackup();
     closeDiscover(
       state.placePanelReturnTarget?.type !== "discover"
     );
@@ -6402,6 +6490,7 @@ function closeRoute() {
     closeRoutePanel();
     closeDiscover();
     closeAbout();
+    closeBackup();
 
     el.favoritesPanel.hidden = false;
     openMobilePanelStandard(
@@ -6819,19 +6908,32 @@ function closeRoute() {
   }
 
   function exportAllSettingsJson() {
+    const scopes = getCheckedBackupScopes();
+
+    if (scopes.length === 0) {
+      show(text[state.language].backupNothingSelected);
+      return;
+    }
+
     const payload = {
       version: 2,
-      exportedAt: new Date().toISOString(),
-      favorites: state.favorites.map(favorite => ({
+      exportedAt: new Date().toISOString()
+    };
+
+    if (scopes.includes("favorites")) {
+      payload.favorites = state.favorites.map(favorite => ({
         ...favorite,
         key: favorite.key,
         title: favorite.title || "",
         address: favorite.address || "",
         lat: Number(favorite.lat),
         lon: Number(favorite.lon)
-      })),
-      customPalette: { ...state.customPalette }
-    };
+      }));
+    }
+
+    if (scopes.includes("colors")) {
+      payload.customPalette = { ...state.customPalette };
+    }
 
     const blob = new Blob(
       [JSON.stringify(payload, null, 2)],
@@ -6860,14 +6962,23 @@ function closeRoute() {
     if (!file) return;
 
     try {
+      const scopes = getCheckedBackupScopes();
+
+      if (scopes.length === 0) {
+        show(text[state.language].backupNothingSelected);
+        return;
+      }
+
       const raw = JSON.parse(await file.text());
       const entries = Array.isArray(raw)
         ? raw
         : raw?.favorites;
 
       let importedCount = 0;
+      let favoritesImportedFlag = false;
+      let colorsImportedFlag = false;
 
-      if (Array.isArray(entries)) {
+      if (scopes.includes("favorites") && Array.isArray(entries)) {
         const imported = [];
         const known = new Set(
           state.favorites.map(item => item.key)
@@ -6922,9 +7033,14 @@ function closeRoute() {
         saveFavorites();
         renderFavoritesList();
         importedCount = imported.length;
+        favoritesImportedFlag = true;
       }
 
-      if (raw?.customPalette && typeof raw.customPalette === "object") {
+      if (
+        scopes.includes("colors") &&
+        raw?.customPalette &&
+        typeof raw.customPalette === "object"
+      ) {
         state.customPalette = {
           ...DEFAULT_CUSTOM_PALETTE,
           ...raw.customPalette
@@ -6932,13 +7048,18 @@ function closeRoute() {
         saveCustomPalette(state.customPalette);
         syncCustomPaletteInputs();
         if (state.theme === "custom") applyTheme(state.theme);
+        colorsImportedFlag = true;
       }
 
-      show(
-        text[state.language].favoritesImported(
-          importedCount
-        )
-      );
+      const messages = [];
+      if (favoritesImportedFlag) {
+        messages.push(text[state.language].favoritesImported(importedCount));
+      }
+      if (colorsImportedFlag) {
+        messages.push(text[state.language].colorsImported);
+      }
+
+      show(messages.join(" ") || text[state.language].favoritesImportError);
     } catch (error) {
       console.error(error);
       show(text[state.language].favoritesImportError);
@@ -6952,6 +7073,7 @@ function closeRoute() {
     closeFavoritesPanel();
     closeLegend();
     closeAbout();
+    closeBackup();
     closeRoutePanel();
     closeDiscover();
 
@@ -6985,6 +7107,7 @@ function closeRoute() {
   function openLegendFromMenu() {
     closeMenu();
     closeAbout();
+    closeBackup();
     closeFavoritesPanel();
     closeRoutePanel();
     closeDiscover();
@@ -7019,6 +7142,28 @@ function closeRoute() {
 
   function returnFromAboutToMenu() {
     closeAbout();
+    closeBackup();
+    openMenuHome();
+  }
+
+  function openBackupFromMenu() {
+    closeMenu();
+    closeLegend();
+    closeAbout();
+    closeFavoritesPanel();
+    closeRoutePanel();
+    closeDiscover();
+
+    el.backupPanel.hidden = false;
+    openMobilePanelStandard(
+      el.backupPanel,
+      "--backup-sheet-height"
+    );
+    el.menuBackupButton?.setAttribute("aria-expanded", "true");
+  }
+
+  function returnFromBackupToMenu() {
+    closeBackup();
     openMenuHome();
   }
 
@@ -7040,6 +7185,7 @@ function closeRoute() {
       closeRoutePanel();
       closeDiscover();
       closeAbout();
+      closeBackup();
     }
 
     el.menuPanel.hidden = !shouldOpen;
@@ -7129,6 +7275,7 @@ el.menuButton.setAttribute("aria-expanded", String(shouldOpen));
     closeMenu();
     closeLegend();
     closeAbout();
+    closeBackup();
     closeFavoritesPanel();
 
     show(text[state.language].mapCleared);
@@ -7167,6 +7314,12 @@ el.menuButton.setAttribute("aria-expanded", String(shouldOpen));
     el.aboutButton?.setAttribute("aria-expanded", "false");
   }
 
+  function closeBackup() {
+    if (!el.backupPanel || el.backupPanel.hidden) return;
+    el.backupPanel.hidden = true;
+    el.menuBackupButton?.setAttribute("aria-expanded", "false");
+  }
+
   function toggleLegend() {
     closeMapContextMenu();
     closePlacePanel();
@@ -7177,6 +7330,7 @@ el.menuButton.setAttribute("aria-expanded", String(shouldOpen));
 
     closeDiscover();
     closeAbout();
+    closeBackup();
     closeRoute();
 
     el.legendPanel.hidden = !shouldOpen;

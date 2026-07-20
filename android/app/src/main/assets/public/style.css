@@ -2238,6 +2238,84 @@ a.place-card-row {
   padding: 6px 8px;
 }
 
+.menu-custom-palette {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid var(--border);
+  margin: -2px 0 0;
+}
+
+.menu-custom-palette[hidden] {
+  display: none;
+}
+
+.menu-custom-palette-heading {
+  margin: 4px 0 0;
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  color: var(--muted);
+}
+
+.menu-custom-palette-heading:first-child {
+  margin-top: 0;
+}
+
+.menu-custom-palette-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(84px, 1fr));
+  gap: 8px;
+}
+
+.menu-custom-palette-grid label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.62rem;
+  color: var(--muted);
+  text-align: center;
+}
+
+.menu-custom-palette-grid input[type="color"] {
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  background: none;
+  cursor: pointer;
+}
+
+.menu-custom-palette-grid input[type="color"]::-webkit-color-swatch-wrapper {
+  padding: 2px;
+}
+
+.menu-custom-palette-grid input[type="color"]::-webkit-color-swatch {
+  border: 0;
+  border-radius: 50%;
+}
+
+#custom-palette-reset {
+  align-self: flex-start;
+  border: 1px solid var(--border);
+  border-radius: 0;
+  padding: 6px 12px;
+  font-size: 0.7rem;
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+}
+
+#custom-palette-reset:hover,
+#custom-palette-reset:focus-visible {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
 @media (max-width: 600px) {
   .menu-panel {
     right: 8px !important;
@@ -3120,13 +3198,14 @@ a.place-card-row {
   outline: none;
 }
 
-.favorites-file-actions {
+.menu-backup-actions {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 7px;
+  padding: 0 12px 12px;
 }
 
-.favorites-file-actions button {
+.menu-backup-actions button {
   display: grid;
   grid-template-columns: 26px minmax(0, 1fr);
   gap: 6px;
@@ -3140,8 +3219,8 @@ a.place-card-row {
   cursor: pointer;
 }
 
-.favorites-file-actions button:hover,
-.favorites-file-actions button:focus-visible {
+.menu-backup-actions button:hover,
+.menu-backup-actions button:focus-visible {
   border-color: var(--accent);
   background: color-mix(
     in srgb,
@@ -3150,7 +3229,7 @@ a.place-card-row {
   );
 }
 
-.favorites-file-actions button span:last-child {
+.menu-backup-actions button span:last-child {
   font-size: 0.69rem;
   font-weight: 750;
 }
