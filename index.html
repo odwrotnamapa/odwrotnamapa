@@ -17,7 +17,7 @@
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="style.css?v=20260719140000">
 <style>#place-openstreetmap,#place-openstreetmap-button,.place-openstreetmap,[data-action='openstreetmap']{display:none!important;}</style>
-<script src="assets/build-info.js?v=20260719140000"></script>
+  <script src="assets/build-info.js?v=20260719140000"></script>
 </head>
 <body>
   <main id="app">
@@ -70,6 +70,7 @@
       <select id="theme-select">
         <option value="default">Domyślna</option>
         <option value="satellite">Satelitarna</option>
+        <option value="custom">Własna</option>
       </select>
       <button id="locate-button" type="button">📍</button>
       <label>
@@ -276,25 +277,6 @@
                  placeholder="Szukaj ulubionych…"
                  aria-label="Szukaj ulubionych">
         </label>
-
-        <div class="favorites-file-actions">
-          <button id="favorites-export"
-                  type="button">
-            <span aria-hidden="true">⬆</span>
-            <span>Eksportuj JSON</span>
-          </button>
-
-          <button id="favorites-import-button"
-                  type="button">
-            <span aria-hidden="true">⬇</span>
-            <span>Importuj JSON</span>
-          </button>
-
-          <input id="favorites-import-input"
-                 type="file"
-                 accept="application/json,.json"
-                 hidden>
-        </div>
       </div>
 
       <div class="favorites-summary">
@@ -449,6 +431,23 @@
                 aria-label="Zamknij menu">×</button>
       </div>
 
+      <div class="menu-backup-actions">
+        <button id="menu-export-all" type="button">
+          <span aria-hidden="true">⬆</span>
+          <span id="menu-export-all-label">Eksportuj JSON</span>
+        </button>
+
+        <button id="menu-import-all-button" type="button">
+          <span aria-hidden="true">⬇</span>
+          <span id="menu-import-all-label">Importuj JSON</span>
+        </button>
+
+        <input id="menu-import-all-input"
+               type="file"
+               accept="application/json,.json"
+               hidden>
+      </div>
+
       <div class="menu-actions">
 
         <button id="favorites-open-button"
@@ -462,14 +461,65 @@
           <span aria-hidden="true">📍</span>
           <span id="menu-location-label">Moja lokalizacja</span>
         </button>
-        <label class="menu-setting">
+        <label class="menu-setting" id="menu-theme-row">
           <span aria-hidden="true">🗺️</span>
           <span id="menu-theme-label">Wygląd mapy</span>
           <select id="menu-theme-select" aria-labelledby="menu-theme-label">
             <option value="default">Domyślna</option>
             <option value="satellite">Satelitarna</option>
+            <option value="custom">Własna</option>
           </select>
         </label>
+
+        <div id="menu-custom-palette" class="menu-custom-palette" hidden>
+          <p class="menu-custom-palette-heading" id="menu-custom-map-heading">Kolory mapy</p>
+          <div class="menu-custom-palette-grid">
+            <label>
+              <span id="custom-color-mapBackground-label">Tło</span>
+              <input type="color" id="custom-color-mapBackground" value="#f7f4ef">
+            </label>
+            <label>
+              <span id="custom-color-mapWater-label">Woda</span>
+              <input type="color" id="custom-color-mapWater" value="#a9cbe0">
+            </label>
+            <label>
+              <span id="custom-color-mapParks-label">Zieleń</span>
+              <input type="color" id="custom-color-mapParks" value="#c9e4c5">
+            </label>
+            <label>
+              <span id="custom-color-mapBuildings-label">Budynki</span>
+              <input type="color" id="custom-color-mapBuildings" value="#e3ddd2">
+            </label>
+            <label>
+              <span id="custom-color-mapRoads-label">Drogi</span>
+              <input type="color" id="custom-color-mapRoads" value="#ffffff">
+            </label>
+            <label>
+              <span id="custom-color-mapBoundaries-label">Granice</span>
+              <input type="color" id="custom-color-mapBoundaries" value="#9a9a9a">
+            </label>
+            <label>
+              <span id="custom-color-mapLabels-label">Etykiety</span>
+              <input type="color" id="custom-color-mapLabels" value="#3a3a3a">
+            </label>
+          </div>
+          <p class="menu-custom-palette-heading" id="menu-custom-ui-heading">Kolory interfejsu</p>
+          <div class="menu-custom-palette-grid">
+            <label>
+              <span id="custom-color-uiAccent-label">Akcent</span>
+              <input type="color" id="custom-color-uiAccent" value="#dc2626">
+            </label>
+            <label>
+              <span id="custom-color-uiPanel-label">Tło paneli</span>
+              <input type="color" id="custom-color-uiPanel" value="#ffffff">
+            </label>
+            <label>
+              <span id="custom-color-uiText-label">Tekst</span>
+              <input type="color" id="custom-color-uiText" value="#18212b">
+            </label>
+          </div>
+          <button type="button" id="custom-palette-reset">Resetuj kolory</button>
+        </div>
 
         <label class="menu-setting">
           <span aria-hidden="true">🌐</span>
@@ -593,7 +643,7 @@
   <script src="src/services/photo-service.js"></script>
   <script src="src/services/place-resolver-service.js"></script>
   <script src="src/services/place-service.js"></script>
-  <script src="assets/capacitor-bridge.js"></script>
+
   <script src="app.js?v=20260719140000"></script>
 </body>
 </html>
