@@ -6,7 +6,6 @@ Większość współczesnych map przedstawia północ na górze, więc łatwo za
 - **Odkrywaj** — szybkie wyszukiwanie w kategoriach (restauracje, kawiarnie, apteki, przystanki i inne)
 - **Ulubione miejsca** — zapis dowolnego punktu na mapie z własną nazwą i notatką
 - **Wyznaczanie tras** — pieszo, rowerem, samochodem i komunikacją miejską (z rozkładami odjazdów na przystankach)
-- **Legenda mapy**
 - **Widok satelitarny**
 - **Własne motywy kolorystyczne** — pełna personalizacja kolorów mapy (woda, zieleń, budynki, drogi) i interfejsu, plus tryb automatyczny podążający za ustawieniem systemu (jasny/ciemny)
 - **Kopia zapasowa** — eksport/import ustawień (ulubione, kolory) do pliku JSON, z wyborem co dokładnie eksportować
@@ -24,7 +23,6 @@ Most modern maps place north at the top. This is not, however, the only possible
 - **Discover** — quick category-based search (restaurants, cafes, pharmacies, bus stops, and more)
 - **Favorite places** — save any point on the map with a custom name and note
 - **Route planning** — walking, cycling, driving, and public transit (with departure times at stops)
-- **Map legend**
 - **Satellite view**
 - **Custom color themes** — full personalization of map colors (water, greenery, buildings, roads) and UI, plus an automatic mode that follows the system's light/dark setting
 - **Backup** — export/import settings (favorites, colors) as a JSON file, with control over what exactly to include
