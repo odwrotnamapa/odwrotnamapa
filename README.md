@@ -2,7 +2,7 @@
 
 Interaktywna mapa z południem u góry
 
-<img width="1870" height="982" alt="Screenshot 2026-07-20 at 15-11-53 Odwrotna Mapa - mapa z południem u góry" src="https://github.com/user-attachments/assets/588352ee-f14c-473d-b7ea-3e66dffa0f9d" />
+<img width="1870" height="982" alt="Screenshot 2026-07-20 at 15-11-53 Odwrotna Mapa - mapa z południem u góry" src="./screeny/swiat.png" />
 
 ---
 
@@ -40,12 +40,12 @@ Most modern maps place north at the top. This is not, however, the only possible
 # Zrzuty ekranu
 
 <p float="left">
-<img width="250" alt="2026-07-20 15 53 36" src="https://github.com/user-attachments/assets/df18c79b-6e5e-42b2-b9d4-167ed19b0b16" />
-<img width="250" alt="2026-07-20 15 55 18" src="https://github.com/user-attachments/assets/bf6c7c60-0953-48cb-8cb6-7fd0b0a5ef33" />
-<img width="250" alt="2026-07-20 15 56 53" src="https://github.com/user-attachments/assets/d50deb0f-0003-4260-a668-b8609bd4fa18" />
-<img width="250" alt="2026-07-20 16 00 48" src="https://github.com/user-attachments/assets/b82fedb0-e0db-4db6-91d9-e34cf79c36a4" />
-<img width="250" alt="2026-07-20 16 07 29" src="https://github.com/user-attachments/assets/4ea2f1d9-183c-4cc8-9a2a-fa3be849cd85" />
-<img width="250" alt="2026-07-20 16 08 27" src="https://github.com/user-attachments/assets/17358a23-efb1-4dd0-967c-92b77bb01788" />
+<img width="250" alt="2026-07-20 15 53 36" src="./screeny/screen1.jpg" />
+<img width="250" alt="2026-07-20 15 55 18" src="./screeny/screen2.jpg" />
+<img width="250" alt="2026-07-20 15 56 53" src="./screeny/screen3.jpg" />
+<img width="250" alt="2026-07-20 16 00 48" src="./screeny/screen4.jpg" />
+<img width="250" alt="2026-07-20 16 07 29" src="./screeny/screen5.jpg" />
+<img width="250" alt="2026-07-20 16 08 27" src="./screeny/screen6.jpg" />
 </p>
 
 ---
