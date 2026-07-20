@@ -1,4 +1,12 @@
-🇵🇱 
+# Odwrotna Mapa
+
+Interaktywna mapa z południem u góry.
+
+<img width="1870" height="982" alt="Screenshot 2026-07-20 at 15-11-53 Odwrotna Mapa - mapa z południem u góry" src="https://github.com/user-attachments/assets/588352ee-f14c-473d-b7ea-3e66dffa0f9d" />
+
+---
+
+# O projekcie 🇵🇱 
 Większość współczesnych map przedstawia północ na górze, więc łatwo zapomnieć, że nie jest to prawo natury, lecz historyczna konwencja. **Odwrotna Mapa** zachęca do spojrzenia na świat z innej perspektywy — i to dosłownie — oraz przypomina, że sposób przedstawiania rzeczywistości znacząco wpływa na to, jak ją postrzegamy.
 
 ...jednak skłamałbym mówiąc, że to jedyne co definiuje tę apkę  —  jest z niej znacznie więcej pożytku i multum funkcjonalności, między innymi:
@@ -13,9 +21,7 @@ Większość współczesnych map przedstawia północ na górze, więc łatwo za
 - **Aplikacja na Androida** i **na Windows** (desktop), oprócz wersji przeglądarkowej (niedługo)
 - W pełni otwarty kod źródłowy (licencja MIT)
 
----
-
-🇬🇧 
+# About the project 🇬🇧 
 Most modern maps place north at the top. This is not, however, the only possible way to represent the world. **Odwrotna Mapa** (literally "Reverse Map") was created as an attempt to look at a familiar map from another perspective and to encourage reflection on how conventions influence our perception of reality.
 
 ...but I'd be lying if I said that's the only thing that defines this app — it offers much more value and a wealth of features, including:
@@ -29,7 +35,6 @@ Most modern maps place north at the top. This is not, however, the only possible
 - **Two languages** — Polish and English
 - **Android app** and **Windows desktop app**, in addition to the browser version (soon)
 - Fully open source (MIT license)
-
 
 ---
 📨 Kontakt:
