@@ -30,12 +30,10 @@ Most modern maps place north at the top. This is not, however, the only possible
 - **Android app** and **Windows desktop app**, in addition to the browser version (soon)
 - Fully open source (MIT license)
 
----
-
-**Link:**
-https://odwrotnamapa.github.io/odwrotnamapa/
 
 ---
+📨 Kontakt:
+odwrotnamapa@protonmail.com
 
 ☕️ Buy Me a Coffee:
 https://buymeacoffee.com/odwrotnamapa
