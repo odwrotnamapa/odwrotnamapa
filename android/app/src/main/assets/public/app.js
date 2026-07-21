@@ -28,6 +28,7 @@
       },
       locate: "Moja lokalizacja", legend: "Legenda", closeLegend: "Zamknij legendę",
       backToMenu: "Wróć do menu",
+      backToPlace: "Wróć do miejsca",
       legendSections: {
         boundaries: "Granice",
         roads: "Drogi",
@@ -105,11 +106,14 @@
       routePickB: "Kliknij na mapie, aby wybrać punkt docelowy.",
       routePickMoveB: "Kliknij na mapie, aby zmienić punkt docelowy.",
       routeReverseError: "Nie udało się odczytać nazwy wybranego miejsca.",
+      locatingForRoute: "Pobieranie lokalizacji…",
+      locateError: "Nie udało się pobrać lokalizacji.",
       routeDirections: "Wskazówki",
       routeSteps: "kroków",
       routeArrival: "Przyjazd",
       routeShare: "Udostępnij trasę",
       routeShared: "Link do trasy został skopiowany.",
+      placeShared: "Link do miejsca został skopiowany.",
       routeShareError: "Nie udało się udostępnić trasy.",
       routeWaypointNote: "Kliknij linię trasy, aby dodać punkt pośredni. Punkt można przeciągać.",
       routeRoundaboutExit: exit => `Na rondzie wybierz ${exit}. zjazd.`,
@@ -171,6 +175,14 @@
       colorsImported: "Zaimportowano kolory.",
       backupNothingSelected: "Zaznacz przynajmniej jedną opcję.",
       backupExportError: "Nie udało się wyeksportować pliku.",
+      menuHistory: "Historia",
+      historyTitle: "Historia",
+      historyClose: "Zamknij Historia",
+      historyEmpty: "Historia jest pusta.",
+      historySearch: "Szukaj w historii…",
+      historyNoMatch: "Brak pasujących wyników.",
+      historyClear: "Wyczyść historię",
+      historyRemove: "Usuń z historii",
       favoritesClose: "Zamknij Ulubione",
       favoritesNoMatch: "Brak pasujących ulubionych.",
       favoritesImported: count => `Zaimportowano ${count} miejsc.`,
@@ -199,14 +211,14 @@
       placeUnknown: "Wybrane miejsce",
       placeType: "Typ",
       placeCoordinates: "Współrzędne",
-      placeSetA: "Ustaw jako Punkt A",
-      placeSetB: "Ustaw jako Punkt B",
+      placeSetRoute: "Wyznacz trasę",
       placeCopy: "Kopiuj",
       placeCopied: "Skopiowano informacje o miejscu.",
       placeAddressCopied: "Skopiowano adres.",
       placeCoordinatesCopied: "Skopiowano współrzędne.",
       placePhoneCopied: "Skopiowano numer telefonu.",
       placeShare: "Udostępnij",
+      placeNearby: "W pobliżu",
       placeOpenOsm: "Otwórz w OpenStreetMap",
       placeError: "Nie udało się pobrać informacji o miejscu.",
       departuresTitle: "Najbliższe odjazdy",
@@ -242,6 +254,7 @@
       },
       locate: "My location", legend: "Legend", closeLegend: "Close legend",
       backToMenu: "Back to menu",
+      backToPlace: "Back to place",
       legendSections: {
         boundaries: "Boundaries",
         roads: "Roads",
@@ -319,11 +332,14 @@
       routePickB: "Click the map to choose the destination.",
       routePickMoveB: "Click the map to move the destination.",
       routeReverseError: "The selected place name could not be read.",
+      locatingForRoute: "Getting your location…",
+      locateError: "Your location could not be retrieved.",
       routeDirections: "Directions",
       routeSteps: "steps",
       routeArrival: "Arrival",
       routeShare: "Share route",
       routeShared: "The route link was copied.",
+      placeShared: "The place link was copied.",
       routeShareError: "The route could not be shared.",
       routeWaypointNote: "Click the route line to add a waypoint. You can drag the point.",
       routeRoundaboutExit: exit => `At the roundabout, take exit ${exit}.`,
@@ -385,6 +401,14 @@
       colorsImported: "Colors imported.",
       backupNothingSelected: "Select at least one option.",
       backupExportError: "Could not export the file.",
+      menuHistory: "History",
+      historyTitle: "History",
+      historyClose: "Close History",
+      historyEmpty: "No history yet.",
+      historySearch: "Search history…",
+      historyNoMatch: "No matching results.",
+      historyClear: "Clear history",
+      historyRemove: "Remove from history",
       favoritesClose: "Close Favorites",
       favoritesNoMatch: "No matching favorites.",
       favoritesImported: count => `Imported ${count} places.`,
@@ -413,14 +437,14 @@
       placeUnknown: "Selected place",
       placeType: "Type",
       placeCoordinates: "Coordinates",
-      placeSetA: "Set as Point A",
-      placeSetB: "Set as Point B",
+      placeSetRoute: "Get directions",
       placeCopy: "Copy",
       placeCopied: "Place information copied.",
       placeAddressCopied: "Address copied.",
       placeCoordinatesCopied: "Coordinates copied.",
       placePhoneCopied: "Phone number copied.",
       placeShare: "Share",
+      placeNearby: "Nearby",
       placeOpenOsm: "Open in OpenStreetMap",
       placeError: "Place information could not be loaded.",
       departuresTitle: "Next departures",
@@ -508,9 +532,12 @@
     mapLongPressTriggered: false,
     placeRequestController: null,
     placePanelReturnTarget: null,
+    discoverBackContext: null,
+    routeBackContext: null,
     exploreMarkers: [],
     exploreRequestController: null,
-    favorites: readFavorites()
+    favorites: readFavorites(),
+    history: readHistory()
   };
 
   const el = {
@@ -552,6 +579,17 @@
     favoritesTitle: $("favorites-title"),
     favoritesSearch: $("favorites-search"),
     favoritesCountLabel: $("favorites-count-label"),
+    historyOpenButton: $("history-open-button"),
+    historyMenuLabel: $("history-menu-label"),
+    historyPanel: $("history-panel"),
+    historySheetHandle: $("history-sheet-handle"),
+    historyBack: $("history-back"),
+    historyClose: $("history-close"),
+    historyTitle: $("history-title"),
+    historySearch: $("history-search"),
+    historyClear: $("history-clear"),
+    historyList: $("history-list"),
+    historyEmpty: $("history-empty"),
     menuLocationButton: $("menu-location-button"),
     menuThemeSelect: $("menu-theme-select"),
     menuCustomPalette: $("menu-custom-palette"),
@@ -609,6 +647,8 @@
     discoverSheetHandle: $("discover-sheet-handle"),
     discoverPanel: $("discover-panel"),
     discoverClose: $("discover-close"),
+    discoverBack: $("discover-back"),
+    routeBack: $("route-back"),
     discoverTitle: $("discover-title"),
     discoverNote: $("discover-note"),
     discoverCategories: $("discover-categories"),
@@ -849,6 +889,20 @@
     returnFromFavoritesToMenu
   );
   el.favoritesSearch?.addEventListener("input", renderFavoritesList);
+  el.historyOpenButton?.addEventListener(
+    "click",
+    openHistoryPanel
+  );
+  el.historyClose?.addEventListener(
+    "click",
+    closeHistory
+  );
+  el.historyBack?.addEventListener(
+    "click",
+    returnFromHistoryToMenu
+  );
+  el.historySearch?.addEventListener("input", renderHistoryList);
+  el.historyClear?.addEventListener("click", clearHistoryList);
   el.menuExportAll?.addEventListener("click", exportAllSettingsJson);
   el.menuImportAllButton?.addEventListener("click", () => {
     el.menuImportAllInput?.click();
@@ -929,6 +983,14 @@
   el.routeButton?.addEventListener("click", toggleRoute);
   el.mobileRouteButton?.addEventListener("click", toggleRoute);
   el.mobileDiscoverButton?.addEventListener("click", toggleDiscover);
+  el.discoverBack?.addEventListener(
+    "click",
+    returnFromDiscoverToPlace
+  );
+  el.routeBack?.addEventListener(
+    "click",
+    returnFromRouteToPlace
+  );
   el.mobileMenuButton?.addEventListener("click", toggleMenu);
   el.discoverButton?.addEventListener("click", toggleDiscover);
   el.discoverClose?.addEventListener("click", closeDiscover);
@@ -958,6 +1020,7 @@
   initializeDiscoverBottomSheet();
   initializeMenuBottomSheet();
   initializeFavoritesBottomSheet();
+  initializeHistoryBottomSheet();
   initializePlaceBottomSheet();
   initializeLegendBottomSheet();
   initializeAboutBottomSheet();
@@ -972,6 +1035,7 @@
       closeMapContextMenu();
       closeMenu();
       closeFavoritesPanel();
+      closeHistory();
       closePlacePanel();
       closeRoutePanel();
     }
@@ -1003,6 +1067,13 @@
     if (el.menuBackupLabel) el.menuBackupLabel.textContent = t.menuBackup;
     if (el.favoritesMenuLabel) el.favoritesMenuLabel.textContent = t.favoritesTitle;
     if (el.favoritesTitle) el.favoritesTitle.textContent = t.favoritesTitle;
+    if (el.historyMenuLabel) el.historyMenuLabel.textContent = t.menuHistory;
+    if (el.historyTitle) el.historyTitle.textContent = t.historyTitle;
+    el.historyClose?.setAttribute("aria-label", t.historyClose);
+    el.historyBack?.setAttribute("aria-label", t.backToMenu);
+    if (el.historySearch) el.historySearch.placeholder = t.historySearch;
+    el.historySearch?.setAttribute("aria-label", t.historySearch);
+    if (el.historyClear) el.historyClear.textContent = t.historyClear;
     if (el.menuExportAllLabel) el.menuExportAllLabel.textContent = t.menuExportAll;
     if (el.menuImportAllLabel) el.menuImportAllLabel.textContent = t.menuImportAll;
     if (el.backupScopeFavoritesLabel) el.backupScopeFavoritesLabel.textContent = t.backupScopeFavorites;
@@ -1025,6 +1096,8 @@
     el.legendClose?.setAttribute("aria-label", t.closeLegend);
     el.legendBack?.setAttribute("aria-label", t.backToMenu);
     el.aboutBack?.setAttribute("aria-label", t.backToMenu);
+    el.discoverBack?.setAttribute("aria-label", t.backToPlace);
+    el.routeBack?.setAttribute("aria-label", t.backToPlace);
     el.backupBack?.setAttribute("aria-label", t.backToMenu);
     el.favoritesBack?.setAttribute("aria-label", t.backToMenu);
     if (el.legendNote) el.legendNote.textContent = t.legendNote;
@@ -1120,6 +1193,7 @@
       (state.theme === "satellite" && prefersDarkColorScheme())
     );
     renderFavoritesList();
+    renderHistoryList();
   }
 
   function ensureSatellite() {
@@ -1932,6 +2006,13 @@
         ];
       }
 
+      const isRouteInput =
+        activeInput === el.routeFrom || activeInput === el.routeTo;
+
+      if (isRouteInput) {
+        items = [{ __myLocationOption: true }, ...items];
+      }
+
       results = items;
       activeIndex = -1;
 
@@ -1951,21 +2032,27 @@
         const icon = document.createElement("span");
         icon.className = "autocomplete-place-icon";
         icon.setAttribute("aria-hidden", "true");
-        icon.textContent = getSearchResultEmoji(result);
 
         const copy = document.createElement("span");
         copy.className = "autocomplete-place-copy";
 
         const title = document.createElement("strong");
-        title.textContent =
-          getSearchResultTitle(result) ||
-          getPreferredPlaceLabel(result);
 
         const details = document.createElement("span");
-        details.textContent =
-          getSearchResultSubtitle(result) ||
-          result.display_name ||
-          "";
+
+        if (result.__myLocationOption) {
+          icon.textContent = "📍";
+          title.textContent = text[state.language].menuLocation;
+        } else {
+          icon.textContent = getSearchResultEmoji(result);
+          title.textContent =
+            getSearchResultTitle(result) ||
+            getPreferredPlaceLabel(result);
+          details.textContent =
+            getSearchResultSubtitle(result) ||
+            result.display_name ||
+            "";
+        }
 
         copy.append(title, details);
         button.append(icon, copy);
@@ -1973,6 +2060,13 @@
           event.preventDefault();
         });
         button.addEventListener("click", () => {
+          if (result.__myLocationOption) {
+            const select = activeSelect;
+            hide();
+            useMyLocationForRoute(point => select?.(point));
+            return;
+          }
+
           activeSelect?.(result);
           hide();
         });
@@ -2158,6 +2252,14 @@
 
         if (input === el.searchInput && !input.value.trim()) {
           renderHistory();
+          return;
+        }
+
+        if (
+          (input === el.routeFrom || input === el.routeTo) &&
+          !input.value.trim()
+        ) {
+          render([]);
           return;
         }
 
@@ -2927,6 +3029,14 @@
   }
 
   function resultToRoutePoint(result) {
+    if (result.__resolvedPoint) {
+      return {
+        lon: Number(result.lon),
+        lat: Number(result.lat),
+        label: result.label
+      };
+    }
+
     return {
       lon: Number(result.lon),
       lat: Number(result.lat),
@@ -3201,6 +3311,15 @@
     });
   }
 
+  function initializeHistoryBottomSheet() {
+    initializeBottomSheet({
+      panel: el.historyPanel,
+      handle: el.historySheetHandle,
+      close: closeHistory,
+      cssVariable: "--history-sheet-height"
+    });
+  }
+
   function initializePlaceBottomSheet() {
     initializeBottomSheet({
       panel: el.placePanel,
@@ -3242,6 +3361,7 @@
     closeMapContextMenu();
     closePlacePanel();
     closeFavoritesPanel();
+    closeHistory();
     closeMenu();
     const shouldOpen = el.discoverPanel.hidden;
 
@@ -3266,12 +3386,59 @@ el.discoverButton?.setAttribute(
     );
   }
 
+  function openDiscoverNearPlace(place, lngLat) {
+    closePlacePanel();
+    closeMapContextMenu();
+    closeFavoritesPanel();
+    closeHistory();
+    closeMenu();
+    closeLegend();
+    closeAbout();
+    closeBackup();
+    closeRoute();
+
+    map.flyTo({
+      center: [lngLat.lng, lngLat.lat],
+      zoom: Math.max(map.getZoom(), 15)
+    });
+
+    state.discoverBackContext = { place, lngLat };
+    if (el.discoverBack) el.discoverBack.hidden = false;
+
+    el.discoverPanel.hidden = false;
+    openMobilePanelStandard(el.discoverPanel, "--discover-sheet-height");
+    el.discoverButton?.setAttribute("aria-expanded", "true");
+    el.discoverButton?.classList.add("is-active");
+    el.mobileDiscoverButton?.setAttribute("aria-expanded", "true");
+    el.mobileDiscoverButton?.classList.add("is-active");
+  }
+
+  function returnFromDiscoverToPlace() {
+    const context = state.discoverBackContext;
+    if (!context) return;
+
+    state.discoverBackContext = null;
+    closeDiscover();
+
+    window.OMAP_PLACE_SERVICE.open(
+      {
+        ...context.place,
+        lat: Number(context.lngLat.lat),
+        lon: Number(context.lngLat.lng)
+      },
+      { source: "discover-nearby" }
+    );
+  }
+
   function closeDiscover(clearResults = true) {
     if (el.discoverPanel.hidden) return;
 
     if (clearResults) {
       clearDiscoverResults();
     }
+
+    state.discoverBackContext = null;
+    if (el.discoverBack) el.discoverBack.hidden = true;
 
     el.discoverPanel.hidden = true;
     el.discoverButton?.setAttribute("aria-expanded", "false");
@@ -3284,6 +3451,7 @@ el.discoverButton?.setAttribute(
     closeMapContextMenu();
     closePlacePanel();
     closeFavoritesPanel();
+    closeHistory();
     closeMenu();
     const shouldOpen = el.routePanel.hidden;
     closeDiscover();
@@ -3291,6 +3459,10 @@ el.discoverButton?.setAttribute(
     closeLegend();
     closeAbout();
     closeBackup();
+    if (!shouldOpen) {
+      state.routeBackContext = null;
+      if (el.routeBack) el.routeBack.hidden = true;
+    }
     el.routePanel.hidden = !shouldOpen;
     if (shouldOpen) {
       openMobilePanelStandard(el.routePanel, "--route-sheet-height");
@@ -3329,9 +3501,28 @@ el.routeButton?.setAttribute("aria-expanded", String(shouldOpen));
     }
   }
 
+  function returnFromRouteToPlace() {
+    const context = state.routeBackContext;
+    if (!context) return;
+
+    state.routeBackContext = null;
+    closeRoute();
+
+    window.OMAP_PLACE_SERVICE.open(
+      {
+        ...context.place,
+        lat: Number(context.lngLat.lat),
+        lon: Number(context.lngLat.lng)
+      },
+      { source: "route-nearby" }
+    );
+  }
+
   function closeRoutePanel() {
     if (el.routePanel.hidden) return;
     clearRoute();
+    state.routeBackContext = null;
+    if (el.routeBack) el.routeBack.hidden = true;
     el.routePanel.hidden = true;
     el.routeButton?.setAttribute("aria-expanded","false");
   }
@@ -3340,6 +3531,8 @@ function closeRoute() {
     if (el.routePanel.hidden) return;
     clearRoute();
     hideAllAutocomplete();
+    state.routeBackContext = null;
+    if (el.routeBack) el.routeBack.hidden = true;
     el.routePanel.hidden = true;
     el.routeButton?.setAttribute("aria-expanded", "false");
     el.routeButton?.classList.remove("is-active");
@@ -4081,6 +4274,11 @@ function closeRoute() {
   );
 
   window.OMAP_BACK_NAVIGATION?.register(
+    "history",
+    () => openHistoryPanel()
+  );
+
+  window.OMAP_BACK_NAVIGATION?.register(
     "discover",
     target => reopenDiscoverPanel(target)
   );
@@ -4119,6 +4317,7 @@ function closeRoute() {
       state.placePanelReturnTarget?.type !== "discover"
     );
     closeFavoritesPanel();
+    closeHistory();
     closeRoutePanel();
 
     if (!el.placePanel) return;
@@ -4376,14 +4575,11 @@ function closeRoute() {
     const favoriteKey = getFavoriteKey(place, lngLat);
 
     actions.append(
-      createPlaceAction("📍", t.placeSetA, () => {
-        setPlaceAsRoutePoint("a", place, lngLat);
-      }),
-      createPlaceAction("🏁", t.placeSetB, () => {
+      createPlaceAction("↪️", t.placeSetRoute, () => {
         setPlaceAsRoutePoint("b", place, lngLat);
       }),
-      createPlaceAction("🔗", t.placeShare, () => {
-        sharePlace(place, lngLat);
+      createPlaceAction("🧭", t.placeNearby, () => {
+        openDiscoverNearPlace(place, lngLat);
       }),
       createPlaceAction(
         isFavorite(favoriteKey) ? "★" : "☆",
@@ -4400,7 +4596,10 @@ function closeRoute() {
           button.classList.toggle("is-favorite", nowFavorite);
         },
         isFavorite(favoriteKey)
-      )
+      ),
+      createPlaceAction("🔗", t.placeShare, () => {
+        sharePlace(place, lngLat);
+      })
     );
 
     card.appendChild(actions);
@@ -4412,6 +4611,8 @@ function closeRoute() {
   });
 
   function createPlaceCard(place, lngLat) {
+    recordPlaceHistory(place, lngLat);
+
     if (
       window.OMAP_PLACE_CARD?.isConfigured?.()
     ) {
@@ -4736,6 +4937,58 @@ function closeRoute() {
     button.classList.toggle("is-favorite", active);
     button.addEventListener("click", () => onClick(button));
     return button;
+  }
+
+  const HISTORY_LIMIT = 50;
+
+  function readHistory() {
+    try {
+      const value = JSON.parse(
+        localStorage.getItem(CONFIG.storageKeys.history) || "[]"
+      );
+      return Array.isArray(value) ? value : [];
+    } catch (_) {
+      return [];
+    }
+  }
+
+  function saveHistory() {
+    safeSet(
+      CONFIG.storageKeys.history,
+      JSON.stringify(state.history)
+    );
+  }
+
+  function recordPlaceHistory(place, lngLat) {
+    if (!place || !lngLat) return;
+
+    const key = getFavoriteKey(place, lngLat);
+
+    const entry = {
+      key,
+      title: getPlaceTitle(place) || "",
+      address: getPlaceAddress(place) || "",
+      lat: Number(lngLat.lat),
+      lon: Number(lngLat.lng),
+      viewedAt: new Date().toISOString(),
+      name: place.name || getPlaceTitle(place) || "",
+      display_name: place.display_name || getPlaceAddress(place) || "",
+      osm_type: place.osm_type || "",
+      osm_id: place.osm_id || "",
+      namedPoiId: place.namedPoiId || "",
+      provider: place.provider || ""
+    };
+
+    state.history = [
+      entry,
+      ...state.history.filter(item => item.key !== key)
+    ].slice(0, HISTORY_LIMIT);
+
+    saveHistory();
+
+    if (!el.historyPanel?.hidden) {
+      renderHistoryList();
+    }
   }
 
   function readFavorites() {
@@ -5167,6 +5420,8 @@ function closeRoute() {
 
     if (el.routePanel.hidden) {
       toggleRoute();
+      state.routeBackContext = { place, lngLat };
+      if (el.routeBack) el.routeBack.hidden = false;
     }
 
     if (key === "a") {
@@ -5207,7 +5462,7 @@ function closeRoute() {
         await navigator.share(shareData);
       } else {
         await navigator.clipboard.writeText(url.toString());
-        show(text[state.language].routeShared);
+        show(text[state.language].placeShared);
       }
     } catch (error) {
       if (error?.name !== "AbortError") {
@@ -5242,8 +5497,13 @@ function closeRoute() {
       state.routePointA = point;
       if (el.routeFrom) el.routeFrom.value = point.label;
       setRouteMarker("a", point);
-      state.routeClickStage = "b";
+      state.routeClickStage = state.routePointB ? "move-b" : "b";
       updateRouteClickHint();
+
+      if (state.routePointA && state.routePointB) {
+        await calculateRouteFromStoredPoints();
+      }
+
       state.routeClickBusy = false;
       return;
     }
@@ -5271,13 +5531,14 @@ function closeRoute() {
       const route = await fetchRoute(state.routePointA, state.routePointB);
       drawRoute(
         route.geometry,
-        state.routePointA,
-        state.routePointB,
+        route.snappedFrom || state.routePointA,
+        route.snappedTo || state.routePointB,
         getSelectedRouteMode()
       );
       updateRouteSummary(route.distance, route.duration);
       renderRouteDirections(route.maneuvers);
       hide();
+      document.activeElement?.blur?.();
     } catch (error) {
       console.error(error);
       show(text[state.language].routeError);
@@ -5431,11 +5692,17 @@ function closeRoute() {
       state.routeClickStage = "move-b";
 
       const route = await fetchRoute(from, to);
-      drawRoute(route.geometry, from, to, getSelectedRouteMode());
+      drawRoute(
+        route.geometry,
+        route.snappedFrom || from,
+        route.snappedTo || to,
+        getSelectedRouteMode()
+      );
       updateRouteClickHint();
       updateRouteSummary(route.distance, route.duration);
       renderRouteDirections(route.maneuvers);
       hide();
+      document.activeElement?.blur?.();
     } catch (error) {
       console.error(error);
       show(text[state.language].routeError);
@@ -5828,7 +6095,29 @@ function closeRoute() {
       },
       distance: Number(trip.summary?.length || 0) * 1000,
       duration: Number(trip.summary?.time || 0),
-      maneuvers
+      maneuvers,
+      snappedFrom: extractGeometryEndpoint(coordinates, 0, from),
+      snappedTo: extractGeometryEndpoint(
+        coordinates,
+        coordinates.length - 1,
+        to
+      )
+    };
+  }
+
+  function extractGeometryEndpoint(coordinates, index, fallbackPoint) {
+    const coordinate = coordinates?.[index];
+    const lon = Number(coordinate?.[0]);
+    const lat = Number(coordinate?.[1]);
+
+    if (!Number.isFinite(lat) || !Number.isFinite(lon)) {
+      return fallbackPoint;
+    }
+
+    return {
+      ...fallbackPoint,
+      lat,
+      lon
     };
   }
 
@@ -6513,6 +6802,154 @@ function closeRoute() {
     updateRouteClickHint();
   }
 
+  function openHistoryPanel() {
+    closeMapContextMenu();
+    closePlacePanel();
+    closeMenu();
+    closeLegend();
+    closeRoutePanel();
+    closeDiscover();
+    closeAbout();
+    closeBackup();
+    closeFavoritesPanel();
+    closeHistory();
+
+    el.historyPanel.hidden = false;
+    openMobilePanelStandard(
+      el.historyPanel,
+      "--history-sheet-height"
+    );
+    if (el.historySearch) el.historySearch.value = "";
+    renderHistoryList();
+
+    if (
+      window.matchMedia("(max-width: 600px)").matches &&
+      el.historyPanel.getBoundingClientRect().height < 90
+    ) {
+      el.historyPanel.style.setProperty(
+        "--history-sheet-height",
+        `${window.innerHeight * 0.42}px`
+      );
+      el.historyPanel.classList.remove("is-collapsed");
+    }
+  }
+
+  function closeHistory() {
+    if (!el.historyPanel || el.historyPanel.hidden) return;
+    el.historyPanel.hidden = true;
+  }
+
+  function returnFromHistoryToMenu() {
+    closeHistory();
+    openMenuHome();
+  }
+
+  function openHistoryPlace(entry) {
+    return window.OMAP_PLACE_SERVICE.open(entry, {
+      source: "history"
+    });
+  }
+
+  function clearHistoryList() {
+    state.history = [];
+    saveHistory();
+    renderHistoryList();
+  }
+
+  function renderHistoryList() {
+    if (!el.historyList) return;
+
+    const query = normalizeSearchText(
+      el.historySearch?.value || ""
+    );
+
+    const fragment = document.createDocumentFragment();
+    const matching = state.history.filter(entry => {
+      if (!query) return true;
+      const haystack = normalizeSearchText(
+        [entry.title, entry.address, entry.lat, entry.lon]
+          .filter(value => value !== undefined && value !== null)
+          .join(" ")
+      );
+      return haystack.includes(query);
+    });
+
+    el.historyList
+      .querySelectorAll(".favorite-place-item")
+      .forEach(node => node.remove());
+
+    if (el.historyEmpty) {
+      el.historyEmpty.hidden = matching.length > 0;
+      el.historyEmpty.textContent = state.history.length === 0
+        ? text[state.language].historyEmpty
+        : text[state.language].historyNoMatch;
+    }
+
+    matching.forEach(entry => {
+      const item = document.createElement("div");
+      item.className = "favorite-place-item";
+
+      const row = document.createElement("div");
+      row.className = "favorite-place-row";
+
+      const openButton = document.createElement("button");
+      openButton.type = "button";
+      openButton.className = "favorite-place-open";
+
+      const icon = document.createElement("span");
+      icon.setAttribute("aria-hidden", "true");
+      icon.textContent = "🕘";
+
+      const copy = document.createElement("span");
+
+      const title = document.createElement("strong");
+      title.textContent =
+        entry.title ||
+        (state.language === "pl" ? "Miejsce" : "Place");
+
+      const address = document.createElement("small");
+      address.textContent =
+        entry.address ||
+        `${Number(entry.lat).toFixed(5)}, ${Number(entry.lon).toFixed(5)}`;
+
+      copy.append(title, address);
+      openButton.append(icon, copy);
+
+      openButton.addEventListener("click", () => {
+        openHistoryPlace(entry);
+      });
+
+      const removeButton = document.createElement("button");
+      removeButton.type = "button";
+      removeButton.className = "favorite-place-remove";
+      removeButton.textContent = "×";
+      removeButton.title = text[state.language].historyRemove;
+      removeButton.setAttribute(
+        "aria-label",
+        text[state.language].historyRemove
+      );
+
+      removeButton.addEventListener("click", () => {
+        state.history = state.history.filter(
+          item => item.key !== entry.key
+        );
+        saveHistory();
+        renderHistoryList();
+      });
+
+      const actions = document.createElement("div");
+      actions.className = "favorite-place-actions";
+      actions.append(removeButton);
+
+      row.append(openButton, actions);
+      item.append(row);
+      fragment.appendChild(item);
+    });
+
+    el.historyList.appendChild(fragment);
+  }
+
+
   function openFavoritesPanel() {
     closeMapContextMenu();
     closePlacePanel();
@@ -6555,6 +6992,9 @@ function closeRoute() {
         event.source !== "favorite" &&
         event.source !== "favorites" &&
         event.source !== "discover" &&
+        event.source !== "discover-nearby" &&
+        event.source !== "route-nearby" &&
+        event.source !== "history" &&
         event.source !== "search" &&
         event.source !== "search-history" &&
         event.source !== "map-info"
@@ -6626,7 +7066,13 @@ function closeRoute() {
         (place.osm_type && place.osm_id)
       );
 
-      setPlacePanelReturnTarget("favorites");
+      if (event.source === "favorite" || event.source === "favorites") {
+        setPlacePanelReturnTarget("favorites");
+      }
+
+      if (event.source === "history") {
+        setPlacePanelReturnTarget("history");
+      }
 
       if (hasExactIdentity) {
         showSelectedPlaceInformation({
@@ -7128,6 +7574,7 @@ function closeRoute() {
     closeMapContextMenu();
     closePlacePanel();
     closeFavoritesPanel();
+    closeHistory();
     closeLegend();
     closeAbout();
     closeBackup();
@@ -7166,6 +7613,7 @@ function closeRoute() {
     closeAbout();
     closeBackup();
     closeFavoritesPanel();
+    closeHistory();
     closeRoutePanel();
     closeDiscover();
 
@@ -7181,6 +7629,7 @@ function closeRoute() {
     closeMenu();
     closeLegend();
     closeFavoritesPanel();
+    closeHistory();
     closeRoutePanel();
     closeDiscover();
 
@@ -7208,6 +7657,7 @@ function closeRoute() {
     closeLegend();
     closeAbout();
     closeFavoritesPanel();
+    closeHistory();
     closeRoutePanel();
     closeDiscover();
 
@@ -7226,6 +7676,7 @@ function closeRoute() {
 
   function returnFromFavoritesToMenu() {
     closeFavoritesPanel();
+    closeHistory();
     openMenuHome();
   }
 
@@ -7233,6 +7684,7 @@ function closeRoute() {
     closeMapContextMenu();
     closePlacePanel();
     closeFavoritesPanel();
+    closeHistory();
     if (!el.menuPanel || !el.menuButton) return;
 
     const shouldOpen = el.menuPanel.hidden;
@@ -7268,6 +7720,40 @@ el.menuButton.setAttribute("aria-expanded", String(shouldOpen));
 
     el.mobileMenuButton?.setAttribute("aria-expanded", "false");
     el.mobileMenuButton?.classList.remove("is-active");
+  }
+
+  function useMyLocationForRoute(onResolved) {
+    if (!navigator.geolocation) {
+      show(
+        state.language === "pl"
+          ? "Twoja przeglądarka nie obsługuje lokalizacji."
+          : "Your browser does not support geolocation."
+      );
+      return;
+    }
+
+    show(text[state.language].locatingForRoute, 0);
+
+    navigator.geolocation.getCurrentPosition(
+      position => {
+        hide();
+        onResolved({
+          lon: position.coords.longitude,
+          lat: position.coords.latitude,
+          label: text[state.language].menuLocation,
+          __resolvedPoint: true
+        });
+      },
+      error => {
+        console.error(error);
+        show(text[state.language].locateError);
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 30000
+      }
+    );
   }
 
   function locateFromMenu() {
@@ -7334,6 +7820,7 @@ el.menuButton.setAttribute("aria-expanded", String(shouldOpen));
     closeAbout();
     closeBackup();
     closeFavoritesPanel();
+    closeHistory();
 
     show(text[state.language].mapCleared);
   }
@@ -7342,6 +7829,7 @@ el.menuButton.setAttribute("aria-expanded", String(shouldOpen));
     closeMapContextMenu();
     closePlacePanel();
     closeFavoritesPanel();
+    closeHistory();
     closeMenu();
 
     const shouldOpen = el.aboutPanel.hidden;
@@ -7381,6 +7869,7 @@ el.menuButton.setAttribute("aria-expanded", String(shouldOpen));
     closeMapContextMenu();
     closePlacePanel();
     closeFavoritesPanel();
+    closeHistory();
     closeMenu();
 
     const shouldOpen = el.legendPanel.hidden;

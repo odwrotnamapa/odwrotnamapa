@@ -5524,6 +5524,10 @@ function closeRoute() {
   async function calculateRouteFromStoredPoints() {
     if (!state.routePointA || !state.routePointB) return;
 
+	// Zamknij klawiaturę od razu
+    document.activeElement?.blur?.();
+
+
     show(text[state.language].routeSearching, 0);
     if (el.routeSubmit) el.routeSubmit.disabled = true;
 
@@ -5538,7 +5542,6 @@ function closeRoute() {
       updateRouteSummary(route.distance, route.duration);
       renderRouteDirections(route.maneuvers);
       hide();
-      document.activeElement?.blur?.();
     } catch (error) {
       console.error(error);
       show(text[state.language].routeError);
