@@ -3056,7 +3056,7 @@
     viewportGap: 8
   });
 
-  const mobilePanelExpandedState = new Set();
+  const mobilePanelMode = new Map();
 
   function isMobilePanelViewport() {
     return window.matchMedia("(max-width: 600px)").matches;
@@ -3086,7 +3086,7 @@
     panel,
     cssVariable,
     height,
-    { animate = true, collapsed = null } = {}
+    { animate = true, collapsed = null, mode = null } = {}
   ) {
     if (!panel || !isMobilePanelViewport()) return;
 
@@ -3112,13 +3112,11 @@
 
     panel.classList.toggle("is-collapsed", shouldCollapse);
 
-    const isNearExpanded =
-      safeHeight >= getMobilePanelMaximumHeight() - 8;
-
-    if (isNearExpanded) {
-      mobilePanelExpandedState.add(cssVariable);
-    } else {
-      mobilePanelExpandedState.delete(cssVariable);
+    // Tryb zapisujemy TYLKO wtedy, gdy wywołujący jawnie go poda -
+    // żadnego zgadywania na podstawie wysokości, żeby stan zapisywał
+    // się natychmiast i niezawodnie, a nie dopiero "za drugim razem".
+    if (mode) {
+      mobilePanelMode.set(cssVariable, mode);
     }
 
     if (animate) {
@@ -3133,7 +3131,8 @@
 
     panel.hidden = false;
 
-    const restoreExpanded = mobilePanelExpandedState.has(cssVariable);
+    const rememberedMode = mobilePanelMode.get(cssVariable);
+    const restoreExpanded = rememberedMode === "expanded";
 
     setMobilePanelHeight(
       panel,
@@ -3141,7 +3140,10 @@
       restoreExpanded
         ? getMobilePanelMaximumHeight()
         : getMobilePanelDefaultHeight(),
-      { collapsed: false }
+      {
+        collapsed: false,
+        mode: restoreExpanded ? "expanded" : "default"
+      }
     );
     panel.classList.remove("is-collapsed");
     panel.scrollTop = 0;
@@ -3152,7 +3154,7 @@
       panel,
       cssVariable,
       MOBILE_PANEL_STANDARD.collapsedHeight,
-      { collapsed: true }
+      { collapsed: true, mode: "collapsed" }
     );
   }
 
@@ -3174,7 +3176,7 @@
         !panel.classList.contains("is-collapsed")
       ) {
         const restoreExpanded =
-          mobilePanelExpandedState.has(cssVariable);
+          mobilePanelMode.get(cssVariable) === "expanded";
 
         setMobilePanelHeight(
           panel,
@@ -3182,7 +3184,10 @@
           restoreExpanded
             ? getMobilePanelMaximumHeight()
             : getMobilePanelDefaultHeight(),
-          { collapsed: false }
+          {
+            collapsed: false,
+            mode: restoreExpanded ? "expanded" : "default"
+          }
         );
       }
     };
@@ -3222,7 +3227,7 @@
       }
 
       const restoreExpanded =
-        mobilePanelExpandedState.has(cssVariable);
+        mobilePanelMode.get(cssVariable) === "expanded";
 
       setMobilePanelHeight(
         panel,
@@ -3230,7 +3235,10 @@
         restoreExpanded
           ? getMobilePanelMaximumHeight()
           : getMobilePanelDefaultHeight(),
-        { collapsed: false }
+        {
+          collapsed: false,
+          mode: restoreExpanded ? "expanded" : "default"
+        }
       );
     };
 
@@ -3278,23 +3286,27 @@
 
       let targetHeight;
       let collapsed;
+      let mode;
 
       if (height <= lowerMidpoint) {
         targetHeight = collapsedHeight;
         collapsed = true;
+        mode = "collapsed";
       } else if (height <= upperMidpoint) {
         targetHeight = defaultHeight;
         collapsed = false;
+        mode = "default";
       } else {
         targetHeight = expandedHeight;
         collapsed = false;
+        mode = "expanded";
       }
 
       setMobilePanelHeight(
         panel,
         cssVariable,
         targetHeight,
-        { collapsed }
+        { collapsed, mode }
       );
 
       try {
@@ -3319,7 +3331,7 @@
           panel,
           cssVariable,
           getMobilePanelMaximumHeight(),
-          { collapsed: false }
+          { collapsed: false, mode: "expanded" }
         );
       } else {
         collapseMobilePanelStandard(panel, cssVariable);
