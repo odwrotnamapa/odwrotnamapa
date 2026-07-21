@@ -7073,9 +7073,14 @@ function closeRoute() {
       window.matchMedia("(max-width: 600px)").matches &&
       el.historyPanel.getBoundingClientRect().height < 90
     ) {
+      const restoreExpanded =
+        mobilePanelExpandedState.has("--history-sheet-height");
+
       el.historyPanel.style.setProperty(
         "--history-sheet-height",
-        `${window.innerHeight * 0.42}px`
+        restoreExpanded
+          ? `${getMobilePanelMaximumHeight()}px`
+          : `${window.innerHeight * 0.42}px`
       );
       el.historyPanel.classList.remove("is-collapsed");
     }
@@ -7219,9 +7224,14 @@ function closeRoute() {
       window.matchMedia("(max-width: 600px)").matches &&
       el.favoritesPanel.getBoundingClientRect().height < 90
     ) {
+      const restoreExpanded =
+        mobilePanelExpandedState.has("--favorites-sheet-height");
+
       el.favoritesPanel.style.setProperty(
         "--favorites-sheet-height",
-        `${window.innerHeight * 0.42}px`
+        restoreExpanded
+          ? `${getMobilePanelMaximumHeight()}px`
+          : `${window.innerHeight * 0.42}px`
       );
       el.favoritesPanel.classList.remove("is-collapsed");
     }
