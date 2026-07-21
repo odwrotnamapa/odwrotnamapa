@@ -3230,7 +3230,9 @@ a.place-card-row {
 
 
 /* Osobny panel Ulubione */
-.favorites-panel {
+.favorites-panel,
+.history-panel,
+.history-panel {
   width: min(380px, calc(100vw - 24px));
 }
 
@@ -3352,12 +3354,29 @@ a.place-card-row {
   font-size: 0.7rem;
 }
 
+#history-clear {
+  border: 1px solid var(--border);
+  border-radius: 0;
+  padding: 5px 12px;
+  font-size: 0.7rem;
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+}
+
+#history-clear:hover,
+#history-clear:focus-visible {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
 .favorites-summary #favorites-count {
   color: var(--accent);
   font-weight: 800;
 }
 
-.favorites-panel .favorites-list {
+.favorites-panel .favorites-list,
+.history-panel .favorites-list {
   max-height: min(52vh, 480px);
   padding-bottom: 4px;
 }
@@ -3381,12 +3400,32 @@ a.place-card-row {
     transition: height 220ms ease;
   }
 
-  .favorites-panel.is-dragging {
+  .history-panel {
+    --history-sheet-height: 42vh;
+    position: absolute;
+    top: auto !important;
+    right: 8px !important;
+    bottom: 74px !important;
+    left: 8px !important;
+    width: auto !important;
+    height: var(--history-sheet-height);
+    max-height: calc(100vh - 90px) !important;
+    min-height: 48px;
+    padding: 0 14px 14px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    touch-action: pan-y;
+    transition: height 220ms ease;
+  }
+
+  .favorites-panel.is-dragging,
+  .history-panel.is-dragging {
     transition: none;
     user-select: none;
   }
 
-  .favorites-sheet-handle {
+  .favorites-sheet-handle,
+  .history-sheet-handle {
     position: sticky;
     top: 0;
     z-index: 4;
@@ -3401,7 +3440,8 @@ a.place-card-row {
     touch-action: none;
   }
 
-  .favorites-sheet-handle span {
+  .favorites-sheet-handle span,
+  .history-sheet-handle span {
     display: block;
     width: 44px;
     height: 5px;
@@ -3409,7 +3449,8 @@ a.place-card-row {
       color-mix(in srgb, var(--text) 35%, transparent);
   }
 
-  .favorites-panel .legend-header {
+  .favorites-panel .legend-header,
+  .history-panel .legend-header {
     position: sticky;
     top: 28px;
     z-index: 3;
@@ -3419,27 +3460,35 @@ a.place-card-row {
     border-bottom: 1px solid var(--border);
   }
 
-  .favorites-panel.is-collapsed {
+  .favorites-panel.is-collapsed,
+  .history-panel.is-collapsed {
     padding-bottom: 0;
     overflow: hidden;
   }
 
   .favorites-panel.is-collapsed
-  > :not(.favorites-sheet-handle) {
+  > :not(.favorites-sheet-handle),
+  .history-panel.is-collapsed
+  > :not(.history-sheet-handle) {
     display: none;
   }
 
   .favorites-panel.is-collapsed
-  .favorites-sheet-handle {
+  .favorites-sheet-handle,
+  .history-panel.is-collapsed
+  .history-sheet-handle {
     height: 48px;
   }
 
   .favorites-panel.is-collapsed
-  .favorites-sheet-handle span {
+  .favorites-sheet-handle span,
+  .history-panel.is-collapsed
+  .history-sheet-handle span {
     width: 52px;
   }
 
-  .favorites-panel .favorites-list {
+  .favorites-panel .favorites-list,
+  .history-panel .favorites-list {
     max-height: none;
   }
 }
@@ -3888,6 +3937,7 @@ a.place-card-row {
   .discover-panel,
   .menu-panel,
   .favorites-panel,
+  .history-panel,
   .place-panel,
   .legend-panel {
     bottom: 130px !important;
@@ -3919,6 +3969,7 @@ a.place-card-row {
 .discover-panel,
 .menu-panel,
 .favorites-panel,
+.history-panel,
 .place-panel,
 .about-panel,
 .backup-panel,
@@ -4045,6 +4096,7 @@ textarea {
 .discover-panel,
 .menu-panel,
 .favorites-panel,
+.history-panel,
 .place-panel,
 .about-panel,
 .backup-panel,
@@ -4542,11 +4594,13 @@ textarea {
   body:has(.discover-panel:not([hidden])) .toolbar,
   body:has(.menu-panel:not([hidden])) .toolbar,
   body:has(.favorites-panel:not([hidden])) .toolbar,
+  body:has(.history-panel:not([hidden])) .toolbar,
   body:has(.place-panel:not([hidden])) .toolbar,
   body:has(.route-panel:not([hidden])) .mobile-bottom-nav,
   body:has(.discover-panel:not([hidden])) .mobile-bottom-nav,
   body:has(.menu-panel:not([hidden])) .mobile-bottom-nav,
   body:has(.favorites-panel:not([hidden])) .mobile-bottom-nav,
+  body:has(.history-panel:not([hidden])) .mobile-bottom-nav,
   body:has(.place-panel:not([hidden])) .mobile-bottom-nav {
     display: none !important;
   }
@@ -4555,6 +4609,7 @@ textarea {
   body:has(.discover-panel:not([hidden])) .discover-panel,
   body:has(.menu-panel:not([hidden])) .menu-panel,
   body:has(.favorites-panel:not([hidden])) .favorites-panel,
+  body:has(.history-panel:not([hidden])) .history-panel,
   body:has(.place-panel:not([hidden])) .place-panel {
     bottom: 8px !important;
     max-height: calc(100vh - 16px) !important;
@@ -4564,6 +4619,7 @@ textarea {
   body:has(.discover-panel:not([hidden])) .maplibregl-ctrl-bottom-left,
   body:has(.menu-panel:not([hidden])) .maplibregl-ctrl-bottom-left,
   body:has(.favorites-panel:not([hidden])) .maplibregl-ctrl-bottom-left,
+  body:has(.history-panel:not([hidden])) .maplibregl-ctrl-bottom-left,
   body:has(.place-panel:not([hidden])) .maplibregl-ctrl-bottom-left {
     display: none !important;
   }
@@ -4727,6 +4783,7 @@ textarea {
   .discover-panel:not([hidden]),
   .menu-panel:not([hidden]),
   .favorites-panel:not([hidden]),
+  .history-panel:not([hidden]),
   .place-panel:not([hidden]),
   .menu-subpanel:not([hidden]) {
     bottom: var(--mobile-panel-bottom-gap) !important;
@@ -4753,6 +4810,10 @@ textarea {
     height: var(--favorites-sheet-height, var(--mobile-panel-default-height)) !important;
   }
 
+  .history-panel:not([hidden]) {
+    height: var(--history-sheet-height, var(--mobile-panel-default-height)) !important;
+  }
+
   .place-panel:not([hidden]) {
     height: var(--place-sheet-height, var(--mobile-panel-default-height)) !important;
   }
@@ -4761,6 +4822,7 @@ textarea {
   .discover-panel.is-collapsed,
   .menu-panel.is-collapsed,
   .favorites-panel.is-collapsed,
+  .history-panel.is-collapsed,
   .place-panel.is-collapsed,
   .menu-subpanel.is-collapsed {
     height: var(--mobile-panel-collapsed-height) !important;
@@ -4773,6 +4835,7 @@ textarea {
   .discover-panel.is-dragging,
   .menu-panel.is-dragging,
   .favorites-panel.is-dragging,
+  .history-panel.is-dragging,
   .place-panel.is-dragging,
   .menu-subpanel.is-dragging {
     transition: none !important;
@@ -4837,6 +4900,7 @@ textarea {
 .legend-panel,
 .route-panel,
 .favorites-panel,
+.history-panel,
 .place-panel,
 .about-panel,
 .backup-panel,
@@ -4949,6 +5013,7 @@ textarea,
   .backup-panel,
   .route-panel,
   .favorites-panel,
+  .history-panel,
   .place-panel,
   .discover-panel,
   .menu-panel,

@@ -47,6 +47,7 @@ window.SOUTHMAPS_CONFIG = Object.freeze({
     view: "odwrotnamapa.view",
     searchHistory: "odwrotnamapa.searchHistory",
     favorites: "odwrotnamapa.favorites",
-    customPalette: "odwrotnamapa.customPalette"
+    customPalette: "odwrotnamapa.customPalette",
+    history: "odwrotnamapa.history"
   }
 });

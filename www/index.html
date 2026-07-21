@@ -158,7 +158,9 @@
               aria-label="Zmień wysokość panelu trasy">
         <span aria-hidden="true"></span>
       </button>
-      <div class="legend-header app-sheet__header panel-shell__header">
+      <div class="legend-header has-menu-back app-sheet__header panel-shell__header">
+        <button id="route-back" class="menu-back-button" type="button"
+                aria-label="Wróć do miejsca" hidden>←</button>
         <h2 id="route-title">Trasa</h2>
         <button id="route-close" class="legend-close" type="button"
                 aria-label="Zamknij planer trasy">×</button>
@@ -290,6 +292,53 @@
         <p id="favorites-empty"
            class="favorites-empty">
           Brak ulubionych miejsc.
+        </p>
+      </div>
+    </aside>
+
+    <aside id="history-panel"
+           class="legend-panel history-panel app-sheet app-sheet--sharp panel-shell"
+           aria-labelledby="history-title"
+           hidden>
+      <button id="history-sheet-handle"
+              class="route-sheet-handle history-sheet-handle app-sheet__handle panel-shell__handle"
+              type="button"
+              aria-label="Zmień wysokość panelu Historia">
+        <span aria-hidden="true"></span>
+      </button>
+
+      <div class="legend-header has-menu-back app-sheet__header panel-shell__header">
+        <button id="history-back"
+                class="menu-back-button"
+                type="button"
+                aria-label="Wróć do menu">←</button>
+        <h2 id="history-title">Historia</h2>
+        <button id="history-close"
+                class="legend-close"
+                type="button"
+                aria-label="Zamknij Historia">×</button>
+      </div>
+
+      <div class="favorites-toolbar">
+        <label class="favorites-search-wrap">
+          <span aria-hidden="true">🔍</span>
+          <input id="history-search"
+                 type="search"
+                 autocomplete="off"
+                 placeholder="Szukaj w historii…"
+                 aria-label="Szukaj w historii">
+        </label>
+      </div>
+
+      <div class="favorites-summary">
+        <button id="history-clear" type="button">Wyczyść historię</button>
+      </div>
+
+      <div id="history-list"
+           class="favorites-list">
+        <p id="history-empty"
+           class="favorites-empty">
+          Historia jest pusta.
         </p>
       </div>
     </aside>
@@ -447,7 +496,9 @@
               aria-label="Zmień wysokość panelu Odkrywaj">
         <span aria-hidden="true"></span>
       </button>
-      <div class="legend-header app-sheet__header panel-shell__header">
+      <div class="legend-header has-menu-back app-sheet__header panel-shell__header">
+        <button id="discover-back" class="menu-back-button" type="button"
+                aria-label="Wróć do miejsca" hidden>←</button>
         <h2 id="discover-title">Odkrywaj</h2>
         <button id="discover-close" class="legend-close" type="button"
                 aria-label="Zamknij Odkrywaj">×</button>
@@ -505,6 +556,13 @@
                 type="button">
           <span aria-hidden="true">⭐</span>
           <span id="favorites-menu-label">Ulubione</span>
+        </button>
+
+        <button id="history-open-button"
+                class="menu-action"
+                type="button">
+          <span aria-hidden="true">🕘</span>
+          <span id="history-menu-label">Historia</span>
         </button>
 
         <button id="menu-location-button" class="menu-action" type="button">
@@ -606,7 +664,7 @@
     <nav id="mobile-bottom-nav" class="mobile-bottom-nav"
          aria-label="Główne funkcje mapy">
       <button id="mobile-route-button" class="mobile-bottom-action" type="button">
-        <span aria-hidden="true">🧭</span>
+        <span aria-hidden="true">↪️</span>
         <span>Trasa</span>
       </button>
       <button id="mobile-discover-button" class="mobile-bottom-action" type="button">
