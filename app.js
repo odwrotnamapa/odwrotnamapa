@@ -3135,10 +3135,14 @@
       panel,
       cssVariable,
       getMobilePanelDefaultHeight(),
-      { collapsed: false, mode: "default" }
+      { collapsed: false, mode: "default", animate: false }
     );
     panel.classList.remove("is-collapsed");
     panel.scrollTop = 0;
+
+    requestAnimationFrame(() => {
+      panel.classList.remove("is-dragging");
+    });
   }
 
   function collapseMobilePanelStandard(panel, cssVariable) {
