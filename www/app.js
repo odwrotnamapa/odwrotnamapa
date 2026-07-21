@@ -3056,6 +3056,8 @@
     viewportGap: 8
   });
 
+  const mobilePanelExpandedState = new Set();
+
   function isMobilePanelViewport() {
     return window.matchMedia("(max-width: 600px)").matches;
   }
@@ -3110,6 +3112,15 @@
 
     panel.classList.toggle("is-collapsed", shouldCollapse);
 
+    const isNearExpanded =
+      safeHeight >= getMobilePanelMaximumHeight() - 8;
+
+    if (isNearExpanded) {
+      mobilePanelExpandedState.add(cssVariable);
+    } else {
+      mobilePanelExpandedState.delete(cssVariable);
+    }
+
     if (animate) {
       requestAnimationFrame(() => {
         panel.classList.remove("is-dragging");
@@ -3121,10 +3132,15 @@
     if (!panel || !isMobilePanelViewport()) return;
 
     panel.hidden = false;
+
+    const restoreExpanded = mobilePanelExpandedState.has(cssVariable);
+
     setMobilePanelHeight(
       panel,
       cssVariable,
-      getMobilePanelDefaultHeight(),
+      restoreExpanded
+        ? getMobilePanelMaximumHeight()
+        : getMobilePanelDefaultHeight(),
       { collapsed: false }
     );
     panel.classList.remove("is-collapsed");
@@ -3157,10 +3173,15 @@
         !panel.classList.contains("is-dragging") &&
         !panel.classList.contains("is-collapsed")
       ) {
+        const restoreExpanded =
+          mobilePanelExpandedState.has(cssVariable);
+
         setMobilePanelHeight(
           panel,
           cssVariable,
-          getMobilePanelDefaultHeight(),
+          restoreExpanded
+            ? getMobilePanelMaximumHeight()
+            : getMobilePanelDefaultHeight(),
           { collapsed: false }
         );
       }
@@ -3200,10 +3221,15 @@
         return;
       }
 
+      const restoreExpanded =
+        mobilePanelExpandedState.has(cssVariable);
+
       setMobilePanelHeight(
         panel,
         cssVariable,
-        getMobilePanelDefaultHeight(),
+        restoreExpanded
+          ? getMobilePanelMaximumHeight()
+          : getMobilePanelDefaultHeight(),
         { collapsed: false }
       );
     };
