@@ -3245,14 +3245,30 @@
       const height = panel.getBoundingClientRect().height;
       const collapsedHeight = MOBILE_PANEL_STANDARD.collapsedHeight;
       const defaultHeight = getMobilePanelDefaultHeight();
-      const midpoint = (collapsedHeight + defaultHeight) / 2;
-      const snapToCollapsed = height <= midpoint;
+      const expandedHeight = getMobilePanelMaximumHeight();
+
+      const lowerMidpoint = (collapsedHeight + defaultHeight) / 2;
+      const upperMidpoint = (defaultHeight + expandedHeight) / 2;
+
+      let targetHeight;
+      let collapsed;
+
+      if (height <= lowerMidpoint) {
+        targetHeight = collapsedHeight;
+        collapsed = true;
+      } else if (height <= upperMidpoint) {
+        targetHeight = defaultHeight;
+        collapsed = false;
+      } else {
+        targetHeight = expandedHeight;
+        collapsed = false;
+      }
 
       setMobilePanelHeight(
         panel,
         cssVariable,
-        snapToCollapsed ? collapsedHeight : defaultHeight,
-        { collapsed: snapToCollapsed }
+        targetHeight,
+        { collapsed }
       );
 
       try {
@@ -3267,9 +3283,18 @@
       if (!isMobilePanelViewport() || movedDuringGesture) return;
 
       const height = panel.getBoundingClientRect().height;
+      const collapsedHeight = MOBILE_PANEL_STANDARD.collapsedHeight;
+      const defaultHeight = getMobilePanelDefaultHeight();
 
-      if (height <= MOBILE_PANEL_STANDARD.collapsedHeight + 8) {
+      if (height <= collapsedHeight + 8) {
         openMobilePanelStandard(panel, cssVariable);
+      } else if (height <= defaultHeight + 8) {
+        setMobilePanelHeight(
+          panel,
+          cssVariable,
+          getMobilePanelMaximumHeight(),
+          { collapsed: false }
+        );
       } else {
         collapseMobilePanelStandard(panel, cssVariable);
       }
