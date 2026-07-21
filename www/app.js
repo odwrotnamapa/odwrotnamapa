@@ -5566,8 +5566,8 @@ function closeRoute() {
       const route = await fetchRoute(state.routePointA, state.routePointB);
       drawRoute(
         route.geometry,
-        state.routePointA,
-        state.routePointB,
+        route.snappedFrom || state.routePointA,
+        route.snappedTo || state.routePointB,
         getSelectedRouteMode()
       );
       updateRouteSummary(route.distance, route.duration);
@@ -5726,7 +5726,12 @@ function closeRoute() {
       state.routeClickStage = "move-b";
 
       const route = await fetchRoute(from, to);
-      drawRoute(route.geometry, from, to, getSelectedRouteMode());
+      drawRoute(
+        route.geometry,
+        route.snappedFrom || from,
+        route.snappedTo || to,
+        getSelectedRouteMode()
+      );
       updateRouteClickHint();
       updateRouteSummary(route.distance, route.duration);
       renderRouteDirections(route.maneuvers);
@@ -6123,7 +6128,29 @@ function closeRoute() {
       },
       distance: Number(trip.summary?.length || 0) * 1000,
       duration: Number(trip.summary?.time || 0),
-      maneuvers
+      maneuvers,
+      snappedFrom: extractGeometryEndpoint(coordinates, 0, from),
+      snappedTo: extractGeometryEndpoint(
+        coordinates,
+        coordinates.length - 1,
+        to
+      )
+    };
+  }
+
+  function extractGeometryEndpoint(coordinates, index, fallbackPoint) {
+    const coordinate = coordinates?.[index];
+    const lon = Number(coordinate?.[0]);
+    const lat = Number(coordinate?.[1]);
+
+    if (!Number.isFinite(lat) || !Number.isFinite(lon)) {
+      return fallbackPoint;
+    }
+
+    return {
+      ...fallbackPoint,
+      lat,
+      lon
     };
   }
 
