@@ -4647,7 +4647,16 @@ function closeRoute() {
     headingRow.append(typeIcon, headingCopy);
     card.appendChild(headingRow);
 
-    if (place?.extratags?.wikipedia || place?.extratags?.wikidata) {
+    const isNamedSettlement =
+      ["city", "town", "village"].includes(
+        String(place?.type || "").toLowerCase()
+      ) && Boolean(place?.name);
+
+    if (
+      place?.extratags?.wikipedia ||
+      place?.extratags?.wikidata ||
+      isNamedSettlement
+    ) {
       const wikipedia = createWikipediaSection();
       card.appendChild(wikipedia.section);
       loadWikipediaSummaryForPlace(place, wikipedia);
@@ -5258,7 +5267,20 @@ function closeRoute() {
       }
     }
 
-    return tagTarget;
+    if (tagTarget) {
+      return tagTarget;
+    }
+
+    const isNamedSettlement =
+      ["city", "town", "village"].includes(
+        String(place?.type || "").toLowerCase()
+      ) && Boolean(place?.name);
+
+    if (isNamedSettlement) {
+      return { lang: preferredLang, title: place.name };
+    }
+
+    return null;
   }
 
   function createWikipediaSection() {
