@@ -3129,24 +3129,20 @@
   function openMobilePanelStandard(panel, cssVariable) {
     if (!panel || !isMobilePanelViewport()) return;
 
-    panel.hidden = false;
-
-    const rememberedMode = mobilePanelMode.get(cssVariable);
-    const restoreExpanded = rememberedMode === "expanded";
-
     setMobilePanelHeight(
       panel,
       cssVariable,
-      restoreExpanded
-        ? getMobilePanelMaximumHeight()
-        : getMobilePanelDefaultHeight(),
-      {
-        collapsed: false,
-        mode: restoreExpanded ? "expanded" : "default"
-      }
+      getMobilePanelDefaultHeight(),
+      { collapsed: false, mode: "default", animate: false }
     );
     panel.classList.remove("is-collapsed");
+
+    panel.hidden = false;
     panel.scrollTop = 0;
+
+    requestAnimationFrame(() => {
+      panel.classList.remove("is-dragging");
+    });
   }
 
   function collapseMobilePanelStandard(panel, cssVariable) {
@@ -3175,19 +3171,11 @@
         !panel.classList.contains("is-dragging") &&
         !panel.classList.contains("is-collapsed")
       ) {
-        const restoreExpanded =
-          mobilePanelMode.get(cssVariable) === "expanded";
-
         setMobilePanelHeight(
           panel,
           cssVariable,
-          restoreExpanded
-            ? getMobilePanelMaximumHeight()
-            : getMobilePanelDefaultHeight(),
-          {
-            collapsed: false,
-            mode: restoreExpanded ? "expanded" : "default"
-          }
+          getMobilePanelDefaultHeight(),
+          { collapsed: false, mode: "default" }
         );
       }
     };
@@ -3226,19 +3214,11 @@
         return;
       }
 
-      const restoreExpanded =
-        mobilePanelMode.get(cssVariable) === "expanded";
-
       setMobilePanelHeight(
         panel,
         cssVariable,
-        restoreExpanded
-          ? getMobilePanelMaximumHeight()
-          : getMobilePanelDefaultHeight(),
-        {
-          collapsed: false,
-          mode: restoreExpanded ? "expanded" : "default"
-        }
+        getMobilePanelDefaultHeight(),
+        { collapsed: false, mode: "default" }
       );
     };
 
@@ -3473,7 +3453,6 @@ el.discoverButton?.setAttribute(
     state.discoverBackContext = { place, lngLat };
     if (el.discoverBack) el.discoverBack.hidden = false;
 
-    el.discoverPanel.hidden = false;
     openMobilePanelStandard(el.discoverPanel, "--discover-sheet-height");
     el.discoverButton?.setAttribute("aria-expanded", "true");
     el.discoverButton?.classList.add("is-active");
@@ -4367,7 +4346,6 @@ function closeRoute() {
   function reopenDiscoverPanel(target) {
     if (!el.discoverPanel) return;
 
-    el.discoverPanel.hidden = false;
     openMobilePanelStandard(
       el.discoverPanel,
       "--discover-sheet-height"
@@ -4462,7 +4440,6 @@ function closeRoute() {
 
     if (!el.placePanel) return;
 
-    el.placePanel.hidden = false;
     openMobilePanelStandard(
       el.placePanel,
       "--place-sheet-height"
@@ -7099,7 +7076,6 @@ function closeRoute() {
     closeFavoritesPanel();
     closeHistory();
 
-    el.historyPanel.hidden = false;
     openMobilePanelStandard(
       el.historyPanel,
       "--history-sheet-height"
@@ -7234,7 +7210,6 @@ function closeRoute() {
     closeAbout();
     closeBackup();
 
-    el.favoritesPanel.hidden = false;
     openMobilePanelStandard(
       el.favoritesPanel,
       "--favorites-sheet-height"
@@ -7846,7 +7821,6 @@ function closeRoute() {
 
     if (!el.menuPanel) return;
 
-    el.menuPanel.hidden = false;
     openMobilePanelStandard(
       el.menuPanel,
       "--menu-sheet-height"
@@ -7868,7 +7842,6 @@ function closeRoute() {
     closeRoutePanel();
     closeDiscover();
 
-    el.legendPanel.hidden = false;
     openMobilePanelStandard(
       el.legendPanel,
       "--legend-sheet-height"
@@ -7884,7 +7857,6 @@ function closeRoute() {
     closeRoutePanel();
     closeDiscover();
 
-    el.aboutPanel.hidden = false;
     openMobilePanelStandard(
       el.aboutPanel,
       "--about-sheet-height"
@@ -7912,7 +7884,6 @@ function closeRoute() {
     closeRoutePanel();
     closeDiscover();
 
-    el.backupPanel.hidden = false;
     openMobilePanelStandard(
       el.backupPanel,
       "--backup-sheet-height"
