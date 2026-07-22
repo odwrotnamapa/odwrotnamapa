@@ -3409,15 +3409,20 @@
       });
     }
 
-    // Przeciąganie treści jak w Google Maps: gdy lista/treść panelu
-    // jest przewinięta do samej góry, dalsze ciągnięcie w dół
-    // zaczyna rozciągać/zwijać panel zamiast nic nie robić.
+    // Przeciąganie treści jak w mainstreamowych apkach mapowych:
+    // ciągnięcie w górę najpierw rozciąga panel do pełnej wysokości,
+    // dopiero potem zaczyna przewijać treść normalnie. Ciągnięcie
+    // w dół, gdy treść jest na samej górze, zwija panel z powrotem.
+    // Tryb ustalamy raz na gest, na podstawie kierunku i aktualnego
+    // stanu w momencie, gdy ruch staje się jednoznaczny.
     const content = panel.querySelector(
       ".app-sheet__body, .panel-shell__body"
     ) || panel;
 
-    let contentDragCandidate = false;
-    let contentStartY = 0;
+    let contentGestureActive = false;
+    let contentGestureMode = null;
+    let contentGestureStartY = 0;
+    let contentGesturePointerId = null;
 
     content.addEventListener("pointerdown", event => {
       if (!isMobilePanelViewport()) return;
@@ -3425,23 +3430,42 @@
         return;
       }
 
-      contentDragCandidate = true;
-      contentStartY = event.clientY;
+      contentGestureActive = true;
+      contentGestureMode = null;
+      contentGestureStartY = event.clientY;
+      contentGesturePointerId = event.pointerId;
     });
 
     content.addEventListener("pointermove", event => {
-      if (!contentDragCandidate || dragging) return;
+      if (
+        !contentGestureActive ||
+        dragging ||
+        event.pointerId !== contentGesturePointerId
+      ) {
+        return;
+      }
 
-      const scrollable = event.target.closest(
-        ".app-sheet__body, .panel-shell__body"
-      ) || content;
-      const pulledDown = event.clientY - contentStartY > 6;
-      const atTop = scrollable.scrollTop <= 0;
+      if (contentGestureMode !== null) return;
 
-      if (pulledDown && atTop) {
-        contentDragCandidate = false;
+      const deltaUp = contentGestureStartY - event.clientY;
+      if (Math.abs(deltaUp) < 6) return;
+
+      const maxHeight = getMobilePanelMaximumHeight();
+      const currentHeight = panel.getBoundingClientRect().height;
+      const atMax = currentHeight >= maxHeight - 2;
+      const atTop = content.scrollTop <= 0;
+
+      contentGestureMode = deltaUp > 0
+        ? (atMax ? "content" : "panel")
+        : (atTop ? "panel" : "content");
+
+      if (contentGestureMode === "panel") {
+        contentGestureActive = false;
         beginDrag(
-          { pointerId: event.pointerId, clientY: contentStartY },
+          {
+            pointerId: event.pointerId,
+            clientY: contentGestureStartY
+          },
           content
         );
         event.preventDefault();
@@ -3449,10 +3473,12 @@
     });
 
     content.addEventListener("pointerup", () => {
-      contentDragCandidate = false;
+      contentGestureActive = false;
+      contentGestureMode = null;
     });
     content.addEventListener("pointercancel", () => {
-      contentDragCandidate = false;
+      contentGestureActive = false;
+      contentGestureMode = null;
     });
 
     document.addEventListener("pointermove", event => {
