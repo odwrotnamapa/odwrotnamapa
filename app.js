@@ -27,6 +27,11 @@
         uiText: "Tekst"
       },
       locate: "Moja lokalizacja", legend: "Legenda", closeLegend: "Zamknij legendę",
+      toggle3d: "Widok 3D",
+      measureDistance: "Zmierz odległość",
+      measureClear: "Wyczyść pomiar",
+      zoomIn: "Przybliż",
+      zoomOut: "Oddal",
       backToMenu: "Wróć do menu",
       backToPlace: "Wróć do miejsca",
       legendSections: {
@@ -309,6 +314,11 @@
         uiText: "Text"
       },
       locate: "My location", legend: "Legend", closeLegend: "Close legend",
+      toggle3d: "3D view",
+      measureDistance: "Measure distance",
+      measureClear: "Clear measurement",
+      zoomIn: "Zoom in",
+      zoomOut: "Zoom out",
       backToMenu: "Back to menu",
       backToPlace: "Back to place",
       legendSections: {
@@ -734,6 +744,10 @@
     toggle3dButton: $("toggle-3d-button"),
     zoomInButton: $("zoom-in-button"),
     zoomOutButton: $("zoom-out-button"),
+    measureToggleButton: $("measure-toggle-button"),
+    measureDistanceBadge: $("measure-distance-badge"),
+    measureDistanceValue: $("measure-distance-value"),
+    measureClearButton: $("measure-clear-button"),
     menuThemeSelect: $("menu-theme-select"),
     menuCustomPalette: $("menu-custom-palette"),
     customMapHeading: $("menu-custom-map-heading"),
@@ -1103,6 +1117,8 @@
   });
   el.zoomInButton?.addEventListener("click", () => map.zoomIn());
   el.zoomOutButton?.addEventListener("click", () => map.zoomOut());
+  el.measureToggleButton?.addEventListener("click", toggleMeasureMode);
+  el.measureClearButton?.addEventListener("click", clearMeasurement);
   el.menuThemeSelect?.addEventListener("change", () => {
     if (!el.themeSelect) return;
     el.themeSelect.value = el.menuThemeSelect.value;
@@ -1217,6 +1233,31 @@
     if (el.locateToggleButton) {
       el.locateToggleButton.title = t.locate;
       el.locateToggleButton.setAttribute("aria-label", t.locate);
+    }
+    if (el.toggle3dButton) {
+      el.toggle3dButton.title = t.toggle3d;
+      el.toggle3dButton.setAttribute("aria-label", t.toggle3d);
+    }
+    if (el.measureToggleButton) {
+      el.measureToggleButton.title = t.measureDistance;
+      el.measureToggleButton.setAttribute(
+        "aria-label",
+        t.measureDistance
+      );
+    }
+    if (el.zoomInButton) {
+      el.zoomInButton.title = t.zoomIn;
+      el.zoomInButton.setAttribute("aria-label", t.zoomIn);
+    }
+    if (el.zoomOutButton) {
+      el.zoomOutButton.title = t.zoomOut;
+      el.zoomOutButton.setAttribute("aria-label", t.zoomOut);
+    }
+    if (el.measureClearButton) {
+      el.measureClearButton.setAttribute(
+        "aria-label",
+        t.measureClear
+      );
     }
     if (el.menuLanguageLabel) el.menuLanguageLabel.textContent = t.menuLanguage;
     if (el.clearMapLabel) el.clearMapLabel.textContent = t.clearMap;
@@ -4595,6 +4636,11 @@ function closeRoute() {
     closeMapContextMenu();
     removeContextPointMarker();
     collapseMobilePanels();
+
+    if (state.measureModeActive) {
+      addMeasurePoint(event.lngLat);
+      return;
+    }
 
     if (!el.routePanel.hidden) {
       const routeStageBeforeClick =
@@ -8802,6 +8848,140 @@ el.menuButton.setAttribute("aria-expanded", String(shouldOpen));
         timeout: 10000,
         maximumAge: 30000
       }
+    );
+  }
+
+  const MEASURE_SOURCE_ID = "odwrotnamapa-measure";
+  const MEASURE_LINE_LAYER_ID = "odwrotnamapa-measure-line";
+  const MEASURE_POINTS_LAYER_ID = "odwrotnamapa-measure-points";
+
+  function haversineDistanceMeters(a, b) {
+    const R = 6371000;
+    const toRad = deg => (deg * Math.PI) / 180;
+    const dLat = toRad(b.lat - a.lat);
+    const dLon = toRad(b.lng - a.lng);
+    const lat1 = toRad(a.lat);
+    const lat2 = toRad(b.lat);
+
+    const h =
+      Math.sin(dLat / 2) ** 2 +
+      Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLon / 2) ** 2;
+
+    return 2 * R * Math.asin(Math.sqrt(h));
+  }
+
+  function formatMeasureDistance(meters) {
+    if (meters >= 1000) {
+      return `${(meters / 1000).toLocaleString(
+        state.language === "pl" ? "pl-PL" : "en-US",
+        { maximumFractionDigits: 2 }
+      )} km`;
+    }
+    return `${Math.round(meters)} m`;
+  }
+
+  function ensureMeasureLayers() {
+    if (map.getSource(MEASURE_SOURCE_ID)) return;
+
+    map.addSource(MEASURE_SOURCE_ID, {
+      type: "geojson",
+      data: { type: "FeatureCollection", features: [] }
+    });
+
+    map.addLayer({
+      id: MEASURE_LINE_LAYER_ID,
+      type: "line",
+      source: MEASURE_SOURCE_ID,
+      filter: ["==", ["geometry-type"], "LineString"],
+      layout: { "line-cap": "round", "line-join": "round" },
+      paint: {
+        "line-color": "#dc2626",
+        "line-width": 3,
+        "line-dasharray": [2, 1]
+      }
+    });
+
+    map.addLayer({
+      id: MEASURE_POINTS_LAYER_ID,
+      type: "circle",
+      source: MEASURE_SOURCE_ID,
+      filter: ["==", ["geometry-type"], "Point"],
+      paint: {
+        "circle-radius": 5,
+        "circle-color": "#ffffff",
+        "circle-stroke-width": 2,
+        "circle-stroke-color": "#dc2626"
+      }
+    });
+  }
+
+  function updateMeasureDisplay() {
+    const points = state.measurePoints || [];
+    let total = 0;
+    for (let i = 1; i < points.length; i++) {
+      total += haversineDistanceMeters(points[i - 1], points[i]);
+    }
+
+    if (el.measureDistanceValue) {
+      el.measureDistanceValue.textContent =
+        formatMeasureDistance(total);
+    }
+    if (el.measureDistanceBadge) {
+      el.measureDistanceBadge.hidden = points.length === 0;
+    }
+
+    const source = map.getSource(MEASURE_SOURCE_ID);
+    if (!source) return;
+
+    const pointFeatures = points.map(p => ({
+      type: "Feature",
+      geometry: { type: "Point", coordinates: [p.lng, p.lat] },
+      properties: {}
+    }));
+
+    const features = [...pointFeatures];
+    if (points.length > 1) {
+      features.push({
+        type: "Feature",
+        geometry: {
+          type: "LineString",
+          coordinates: points.map(p => [p.lng, p.lat])
+        },
+        properties: {}
+      });
+    }
+
+    source.setData({ type: "FeatureCollection", features });
+  }
+
+  function addMeasurePoint(lngLat) {
+    if (!state.measurePoints) state.measurePoints = [];
+    state.measurePoints.push({ lat: lngLat.lat, lng: lngLat.lng });
+    updateMeasureDisplay();
+  }
+
+  function clearMeasurement() {
+    state.measurePoints = [];
+    updateMeasureDisplay();
+  }
+
+  function toggleMeasureMode() {
+    state.measureModeActive = !state.measureModeActive;
+
+    if (state.measureModeActive) {
+      ensureMeasureLayers();
+      closeOtherMobilePanels([]);
+    } else {
+      clearMeasurement();
+    }
+
+    el.measureToggleButton?.classList.toggle(
+      "is-active",
+      state.measureModeActive
+    );
+    el.measureToggleButton?.setAttribute(
+      "aria-pressed",
+      String(state.measureModeActive)
     );
   }
 
