@@ -7,15 +7,16 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="Odwrotna Mapa.">
-  <title>Odwrotna Mapa - Interaktywna mapa z południem u góry</title>
+  <title>Odwrotna Mapa - Odwróć standardowe myślenie o mapach</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/maplibre-gl@5.24.0/dist/maplibre-gl.css">
+  <link rel="stylesheet" href="https://unpkg.com/mapillary-js@4.1.2/dist/mapillary.css">
   <link rel="icon" href="assets/favicon.svg?v=2" type="image/svg+xml">
-  <link rel="stylesheet" href="style.css?v=20260724170000">
+  <link rel="stylesheet" href="style.css?v=20260725260000">
 <style>#place-openstreetmap,#place-openstreetmap-button,.place-openstreetmap,[data-action='openstreetmap']{display:none!important;}</style>
   <script src="assets/build-info.js?v=20260721190000"></script>
   <script src="assets/capacitor-bridge.js"></script>
@@ -65,6 +66,14 @@
           <span aria-hidden="true">📍</span>
         </button>
       </form>
+      </div>
+
+      <div id="streetview-actions" class="streetview-actions">
+        <button id="streetview-toggle-button" class="icon-button" type="button"
+                title="Widok uliczny" aria-label="Widok uliczny"
+                aria-pressed="false">
+          <span aria-hidden="true">🧍</span>
+        </button>
       </div>
 
       <div class="toolbar-actions">
@@ -407,6 +416,42 @@
       </div>
     </aside>
 
+    <aside id="streetview-panel"
+           class="legend-panel streetview-panel app-sheet app-sheet--sharp panel-shell"
+           aria-labelledby="streetview-panel-title"
+           hidden>
+      <button id="streetview-sheet-handle"
+              class="route-sheet-handle streetview-sheet-handle app-sheet__handle panel-shell__handle"
+              type="button"
+              aria-label="Zmień wysokość widoku ulicznego">
+        <span aria-hidden="true"></span>
+      </button>
+
+      <div class="legend-header app-sheet__header panel-shell__header">
+        <span aria-hidden="true"></span>
+        <h2 id="streetview-panel-title">Widok uliczny</h2>
+        <button id="streetview-panel-close"
+                class="legend-close"
+                type="button"
+                aria-label="Zamknij widok uliczny">×</button>
+      </div>
+
+      <div class="streetview-viewport">
+        <div id="streetview-container" class="streetview-container"></div>
+        <button id="streetview-fullscreen-button"
+                class="icon-button streetview-fullscreen-button"
+                type="button"
+                aria-label="Pełny ekran"
+                aria-pressed="false">⛶</button>
+      </div>
+
+      <p class="streetview-attribution">
+        <a href="https://www.mapillary.com" target="_blank" rel="noopener noreferrer">
+          © Mapillary
+        </a>
+      </p>
+    </aside>
+
     <aside id="about-panel" class="legend-panel about-panel menu-subpanel app-sheet app-sheet--sharp panel-shell"
            aria-labelledby="about-title" hidden>
       <button id="about-sheet-handle" class="route-sheet-handle app-sheet__handle panel-shell__handle" type="button"
@@ -743,7 +788,8 @@
     </div>
 
   <script src="https://cdn.jsdelivr.net/npm/maplibre-gl@5.24.0/dist/maplibre-gl.js"></script>
-  <script src="config.js?v=20260724160000"></script>
+  <script src="https://unpkg.com/mapillary-js@4.1.2/dist/mapillary.js"></script>
+  <script src="config.js?v=20260725110000"></script>
   <script src="search-v2/lexicon/data-pl.js?v=20260721190000"></script>
   <script src="search-v2/lexicon/loader.js?v=20260721190000"></script>
   <script src="search-v2/location/compiled/pl-locations.compiled.js?v=20260721190000"></script>
@@ -787,6 +833,6 @@
   <script src="src/services/place-resolver-service.js"></script>
   <script src="src/services/place-service.js"></script>
 
-  <script src="app.js?v=20260724170000"></script>
+  <script src="app.js?v=20260726100000"></script>
 </body>
 </html>
