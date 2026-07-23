@@ -247,6 +247,8 @@
       contextFavoriteRemoved: "Usunięto miejsce z ulubionych.",
       menuClose: "Zamknij menu",
       clearMap: "Wyczyść mapę",
+      exportPng: "Zapisz jako PNG",
+      exportPngError: "Nie udało się zapisać obrazu mapy.",
       mapCleared: "Wyczyszczono elementy mapy.",
       placePanelTitle: "Informacje",
       placePanelClose: "Zamknij informacje o miejscu",
@@ -525,6 +527,8 @@
       contextFavoriteRemoved: "Place removed from favorites.",
       menuClose: "Close menu",
       clearMap: "Clear map",
+      exportPng: "Save as PNG",
+      exportPngError: "Could not save the map image.",
       mapCleared: "Map elements cleared.",
       placePanelTitle: "Information",
       placePanelClose: "Close place information",
@@ -735,9 +739,11 @@
     brandButton: $("brand-button"),
     mapContextMenu: $("map-context-menu"),
     clearMapButton: $("clear-map-button"),
+    exportPngButton: $("export-png-button"),
     menuAboutButton: $("menu-about-button"),
     menuLanguageLabel: $("menu-language-label"),
     clearMapLabel: $("clear-map-label"),
+    exportPngLabel: $("export-png-label"),
     menuAboutLabel: $("menu-about-label"),
     aboutButton: $("about-button"),
     aboutPanel: $("about-panel"),
@@ -827,7 +833,8 @@
       zoom: saved?.zoom ?? CONFIG.map.zoom,
       bearing: saved?.bearing ?? CONFIG.map.bearing,
       pitch: saved?.pitch ?? CONFIG.map.pitch,
-      minZoom: CONFIG.map.minZoom
+      minZoom: CONFIG.map.minZoom,
+      preserveDrawingBuffer: true
     });
     window.__omapMap = map;
   } catch (error) {
@@ -1086,6 +1093,7 @@
     el.languageSelect.dispatchEvent(new Event("change"));
   });
   el.clearMapButton?.addEventListener("click", clearMapView);
+  el.exportPngButton?.addEventListener("click", exportMapAsPng);
   el.menuAboutButton?.addEventListener(
     "click",
     openAboutFromMenu
@@ -1191,6 +1199,7 @@
     }
     if (el.menuLanguageLabel) el.menuLanguageLabel.textContent = t.menuLanguage;
     if (el.clearMapLabel) el.clearMapLabel.textContent = t.clearMap;
+    if (el.exportPngLabel) el.exportPngLabel.textContent = t.exportPng;
     if (el.menuAboutLabel) el.menuAboutLabel.textContent = t.menuAbout;
     if (el.menuBackupLabel) el.menuBackupLabel.textContent = t.menuBackup;
     if (el.favoritesMenuLabel) el.favoritesMenuLabel.textContent = t.favoritesTitle;
@@ -8790,6 +8799,33 @@ el.menuButton.setAttribute("aria-expanded", String(shouldOpen));
         maximumAge: 30000
       }
     );
+  }
+
+  function exportMapAsPng() {
+    const t = text[state.language];
+
+    try {
+      map.once("render", () => {
+        try {
+          const canvas = map.getCanvas();
+          const dataUrl = canvas.toDataURL("image/png");
+
+          const link = document.createElement("a");
+          link.href = dataUrl;
+          link.download = `odwrotna-mapa-${Date.now()}.png`;
+          document.body.appendChild(link);
+          link.click();
+          link.remove();
+        } catch (error) {
+          console.error(error);
+          show(t.exportPngError);
+        }
+      });
+      map.triggerRepaint();
+    } catch (error) {
+      console.error(error);
+      show(t.exportPngError);
+    }
   }
 
   function clearMapView() {
