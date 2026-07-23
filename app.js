@@ -3,6 +3,16 @@
 
   // Architektura 2.0: komponenty i serwisy są ładowane przed app.js.
 
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+      navigator.serviceWorker
+        .register("sw.js")
+        .catch(error => {
+          console.warn("Rejestracja Service Workera nie powiodła się:", error);
+        });
+    });
+  }
+
   const CONFIG = window.SOUTHMAPS_CONFIG;
   const $ = id => document.getElementById(id);
 
