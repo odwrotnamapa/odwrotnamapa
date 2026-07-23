@@ -248,6 +248,8 @@
       menuClose: "Zamknij menu",
       clearMap: "Wyczyść mapę",
       exportPng: "Zapisz jako PNG",
+      exportPngWorking: "Przygotowuję obraz mapy…",
+      exportPngDone: "Obraz mapy zapisany.",
       exportPngError: "Nie udało się zapisać obrazu mapy.",
       mapCleared: "Wyczyszczono elementy mapy.",
       placePanelTitle: "Informacje",
@@ -528,6 +530,8 @@
       menuClose: "Close menu",
       clearMap: "Clear map",
       exportPng: "Save as PNG",
+      exportPngWorking: "Preparing the map image…",
+      exportPngDone: "Map image saved.",
       exportPngError: "Could not save the map image.",
       mapCleared: "Map elements cleared.",
       placePanelTitle: "Information",
@@ -8801,8 +8805,22 @@ el.menuButton.setAttribute("aria-expanded", String(shouldOpen));
     );
   }
 
+  function blobToBase64(blob) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const result = reader.result || "";
+        resolve(String(result).split(",")[1] || "");
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+  }
+
   function exportMapAsPng() {
     const t = text[state.language];
+
+    show(t.exportPngWorking, 0);
 
     try {
       map.once("render", () => {
@@ -8815,6 +8833,35 @@ el.menuButton.setAttribute("aria-expanded", String(shouldOpen));
           }
 
           const fileName = `odwrotna-mapa-${Date.now()}.png`;
+
+          // Android WebView nie obsługuje niezawodnie pobierania
+          // plików przez <a download> ani udostępniania blobów -
+          // tam zapisujemy plik natywnie i otwieramy systemowe
+          // okno udostępniania/zapisu, tak jak przy kopii zapasowej.
+          if (
+            window.CapacitorPlatform === "android" &&
+            window.CapacitorFilesystem
+          ) {
+            try {
+              const base64 = await blobToBase64(blob);
+              const writeResult = await window.CapacitorFilesystem.writeFile({
+                path: fileName,
+                data: base64,
+                directory: window.CapacitorDirectory.Cache
+              });
+
+              await window.CapacitorShare.share({
+                title: fileName,
+                files: [writeResult.uri]
+              });
+              show(t.exportPngDone);
+            } catch (error) {
+              console.error(error);
+              show(t.exportPngError);
+            }
+            return;
+          }
+
           const file = new File([blob], fileName, {
             type: "image/png"
           });
@@ -8828,9 +8875,13 @@ el.menuButton.setAttribute("aria-expanded", String(shouldOpen));
           ) {
             try {
               await navigator.share({ files: [file] });
+              show(t.exportPngDone);
               return;
             } catch (error) {
-              if (error?.name === "AbortError") return;
+              if (error?.name === "AbortError") {
+                hide();
+                return;
+              }
               console.error(error);
             }
           }
@@ -8844,6 +8895,7 @@ el.menuButton.setAttribute("aria-expanded", String(shouldOpen));
             link.click();
             link.remove();
             URL.revokeObjectURL(url);
+            show(t.exportPngDone);
           } catch (error) {
             console.error(error);
             show(t.exportPngError);

@@ -247,6 +247,10 @@
       contextFavoriteRemoved: "Usunięto miejsce z ulubionych.",
       menuClose: "Zamknij menu",
       clearMap: "Wyczyść mapę",
+      exportPng: "Zapisz jako PNG",
+      exportPngWorking: "Przygotowuję obraz mapy…",
+      exportPngDone: "Obraz mapy zapisany.",
+      exportPngError: "Nie udało się zapisać obrazu mapy.",
       mapCleared: "Wyczyszczono elementy mapy.",
       placePanelTitle: "Informacje",
       placePanelClose: "Zamknij informacje o miejscu",
@@ -525,6 +529,10 @@
       contextFavoriteRemoved: "Place removed from favorites.",
       menuClose: "Close menu",
       clearMap: "Clear map",
+      exportPng: "Save as PNG",
+      exportPngWorking: "Preparing the map image…",
+      exportPngDone: "Map image saved.",
+      exportPngError: "Could not save the map image.",
       mapCleared: "Map elements cleared.",
       placePanelTitle: "Information",
       placePanelClose: "Close place information",
@@ -735,9 +743,11 @@
     brandButton: $("brand-button"),
     mapContextMenu: $("map-context-menu"),
     clearMapButton: $("clear-map-button"),
+    exportPngButton: $("export-png-button"),
     menuAboutButton: $("menu-about-button"),
     menuLanguageLabel: $("menu-language-label"),
     clearMapLabel: $("clear-map-label"),
+    exportPngLabel: $("export-png-label"),
     menuAboutLabel: $("menu-about-label"),
     aboutButton: $("about-button"),
     aboutPanel: $("about-panel"),
@@ -827,7 +837,8 @@
       zoom: saved?.zoom ?? CONFIG.map.zoom,
       bearing: saved?.bearing ?? CONFIG.map.bearing,
       pitch: saved?.pitch ?? CONFIG.map.pitch,
-      minZoom: CONFIG.map.minZoom
+      minZoom: CONFIG.map.minZoom,
+      preserveDrawingBuffer: true
     });
     window.__omapMap = map;
   } catch (error) {
@@ -1086,6 +1097,7 @@
     el.languageSelect.dispatchEvent(new Event("change"));
   });
   el.clearMapButton?.addEventListener("click", clearMapView);
+  el.exportPngButton?.addEventListener("click", exportMapAsPng);
   el.menuAboutButton?.addEventListener(
     "click",
     openAboutFromMenu
@@ -1191,6 +1203,7 @@
     }
     if (el.menuLanguageLabel) el.menuLanguageLabel.textContent = t.menuLanguage;
     if (el.clearMapLabel) el.clearMapLabel.textContent = t.clearMap;
+    if (el.exportPngLabel) el.exportPngLabel.textContent = t.exportPng;
     if (el.menuAboutLabel) el.menuAboutLabel.textContent = t.menuAbout;
     if (el.menuBackupLabel) el.menuBackupLabel.textContent = t.menuBackup;
     if (el.favoritesMenuLabel) el.favoritesMenuLabel.textContent = t.favoritesTitle;
@@ -8790,6 +8803,110 @@ el.menuButton.setAttribute("aria-expanded", String(shouldOpen));
         maximumAge: 30000
       }
     );
+  }
+
+  function blobToBase64(blob) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const result = reader.result || "";
+        resolve(String(result).split(",")[1] || "");
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+  }
+
+  function exportMapAsPng() {
+    const t = text[state.language];
+
+    show(t.exportPngWorking, 0);
+
+    try {
+      map.once("render", () => {
+        const canvas = map.getCanvas();
+
+        canvas.toBlob(async blob => {
+          if (!blob) {
+            show(t.exportPngError);
+            return;
+          }
+
+          const fileName = `odwrotna-mapa-${Date.now()}.png`;
+
+          // Android WebView nie obsługuje niezawodnie pobierania
+          // plików przez <a download> ani udostępniania blobów -
+          // tam zapisujemy plik natywnie i otwieramy systemowe
+          // okno udostępniania/zapisu, tak jak przy kopii zapasowej.
+          if (
+            window.CapacitorPlatform === "android" &&
+            window.CapacitorFilesystem
+          ) {
+            try {
+              const base64 = await blobToBase64(blob);
+              const writeResult = await window.CapacitorFilesystem.writeFile({
+                path: fileName,
+                data: base64,
+                directory: window.CapacitorDirectory.Cache
+              });
+
+              await window.CapacitorShare.share({
+                title: fileName,
+                files: [writeResult.uri]
+              });
+              show(t.exportPngDone);
+            } catch (error) {
+              console.error(error);
+              show(t.exportPngError);
+            }
+            return;
+          }
+
+          const file = new File([blob], fileName, {
+            type: "image/png"
+          });
+
+          // Safari na iOS nie obsługuje poprawnie atrybutu
+          // download - tam trzeba użyć natywnego arkusza
+          // udostępniania, żeby dało się zapisać obrazek.
+          if (
+            navigator.canShare &&
+            navigator.canShare({ files: [file] })
+          ) {
+            try {
+              await navigator.share({ files: [file] });
+              show(t.exportPngDone);
+              return;
+            } catch (error) {
+              if (error?.name === "AbortError") {
+                hide();
+                return;
+              }
+              console.error(error);
+            }
+          }
+
+          try {
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.href = url;
+            link.download = fileName;
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            URL.revokeObjectURL(url);
+            show(t.exportPngDone);
+          } catch (error) {
+            console.error(error);
+            show(t.exportPngError);
+          }
+        }, "image/png");
+      });
+      map.triggerRepaint();
+    } catch (error) {
+      console.error(error);
+      show(t.exportPngError);
+    }
   }
 
   function clearMapView() {

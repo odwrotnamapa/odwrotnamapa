@@ -36,6 +36,7 @@ html, body, #app, #map {
 
 body {
   overflow: hidden;
+  overscroll-behavior: none;
   font-family: var(--font);
   color: var(--text);
 }
