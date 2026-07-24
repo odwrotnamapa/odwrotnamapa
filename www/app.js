@@ -5198,11 +5198,18 @@ function closeRoute() {
     // Poziom szczegółowości odpowiedzi Nominatim dopasowany do
     // aktualnego przybliżenia mapy - przy dużym oddaleniu chcemy
     // nazwy województwa/kraju, nie najbliższego drobnego obiektu
-    // (np. parkingu). Sztywne "18" powodowało, że kliknięcie w
-    // okolicy miasta pokazywało przypadkowy pobliski punkt zamiast
-    // miejscowości.
+    // (np. parkingu). Celowo pomijamy pośrednie poziomy powiatu i
+    // gminy - przy średnim oddaleniu wolimy od razu przeskoczyć do
+    // miasta, zamiast zatrzymywać się na tych szczeblach.
     const mapZoom = Math.round(map.getZoom());
-    const reverseZoom = Math.min(18, Math.max(3, mapZoom));
+    let reverseZoom;
+    if (mapZoom <= 4) {
+      reverseZoom = 3; // kraj
+    } else if (mapZoom <= 8) {
+      reverseZoom = 5; // województwo
+    } else {
+      reverseZoom = Math.min(18, Math.max(10, mapZoom)); // miasto i bliżej
+    }
     url.searchParams.set("zoom", String(reverseZoom));
 
     const response = await fetch(url, {
@@ -5527,6 +5534,31 @@ function closeRoute() {
   function getPlaceTitle(place) {
     const names = place.namedetails || {};
     const address = place.address || {};
+
+    // Przy dużym oddaleniu wybieramy nazwę bezpośrednio z pełnej
+    // hierarchii adresu (którą Nominatim zawsze zwraca w całości),
+    // zamiast ufać temu, co Nominatim uznał za "główny" obiekt dla
+    // danego zoomu - to jedyny pewny sposób, żeby powiat i gmina
+    // nigdy się tu nie pojawiły, niezależnie od tego, co akurat
+    // najbliżej klikniętego punktu.
+    const currentMapZoom = Math.round(map.getZoom());
+
+    if (currentMapZoom <= 4) {
+      return capitalizeFirstLetter(
+        address.country ||
+        place.name ||
+        ""
+      );
+    }
+
+    if (currentMapZoom <= 8) {
+      return capitalizeFirstLetter(
+        address.state ||
+        address.country ||
+        place.name ||
+        ""
+      );
+    }
 
     return capitalizeFirstLetter(
       names[`name:${state.language}`] ||
