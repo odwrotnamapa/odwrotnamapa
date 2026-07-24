@@ -2,6 +2,7 @@
 
 **Odwróć swój standard myślenia o mapach**
 
+<img width="1870" height="982" alt="Screenshot 2026-07-20 at 15-11-53 Odwrotna Mapa - mapa z południem u góry" src="./screeny/swiat.png" />
 
 ---
 Apki (beta do testów): https://github.com/odwrotnamapa/OdwrotnaMapa/releases/tag/v1.0
