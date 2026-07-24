@@ -5198,11 +5198,18 @@ function closeRoute() {
     // Poziom szczegółowości odpowiedzi Nominatim dopasowany do
     // aktualnego przybliżenia mapy - przy dużym oddaleniu chcemy
     // nazwy województwa/kraju, nie najbliższego drobnego obiektu
-    // (np. parkingu). Sztywne "18" powodowało, że kliknięcie w
-    // okolicy miasta pokazywało przypadkowy pobliski punkt zamiast
-    // miejscowości.
+    // (np. parkingu). Celowo pomijamy pośrednie poziomy powiatu i
+    // gminy - przy średnim oddaleniu wolimy od razu przeskoczyć do
+    // miasta, zamiast zatrzymywać się na tych szczeblach.
     const mapZoom = Math.round(map.getZoom());
-    const reverseZoom = Math.min(18, Math.max(3, mapZoom));
+    let reverseZoom;
+    if (mapZoom <= 4) {
+      reverseZoom = 3; // kraj
+    } else if (mapZoom <= 8) {
+      reverseZoom = 5; // województwo
+    } else {
+      reverseZoom = Math.min(18, Math.max(10, mapZoom)); // miasto i bliżej
+    }
     url.searchParams.set("zoom", String(reverseZoom));
 
     const response = await fetch(url, {
