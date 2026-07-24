@@ -5535,6 +5535,31 @@ function closeRoute() {
     const names = place.namedetails || {};
     const address = place.address || {};
 
+    // Przy dużym oddaleniu wybieramy nazwę bezpośrednio z pełnej
+    // hierarchii adresu (którą Nominatim zawsze zwraca w całości),
+    // zamiast ufać temu, co Nominatim uznał za "główny" obiekt dla
+    // danego zoomu - to jedyny pewny sposób, żeby powiat i gmina
+    // nigdy się tu nie pojawiły, niezależnie od tego, co akurat
+    // najbliżej klikniętego punktu.
+    const currentMapZoom = Math.round(map.getZoom());
+
+    if (currentMapZoom <= 4) {
+      return capitalizeFirstLetter(
+        address.country ||
+        place.name ||
+        ""
+      );
+    }
+
+    if (currentMapZoom <= 8) {
+      return capitalizeFirstLetter(
+        address.state ||
+        address.country ||
+        place.name ||
+        ""
+      );
+    }
+
     return capitalizeFirstLetter(
       names[`name:${state.language}`] ||
       names.name ||
