@@ -1,12 +1,11 @@
 # <a href="https://odwrotnamapa.pl/">Odwrotna Mapa</a>
 
-Odwróć swój standard myślenia o mapach
-
-Apki (w wersji beta): https://github.com/odwrotnamapa/OdwrotnaMapa/releases/tag/v1.0
+**Odwróć swój standard myślenia o mapach**
 
 <img width="1870" height="982" alt="Screenshot 2026-07-20 at 15-11-53 Odwrotna Mapa - mapa z południem u góry" src="./screeny/swiat.png" />
 
 ---
+Apki (Wersja Beta): https://github.com/odwrotnamapa/OdwrotnaMapa/releases/tag/v1.0
 
 # 🇵🇱 O projekcie
 Większość współczesnych map przedstawia północ na górze, więc łatwo zapomnieć, że nie jest to prawo natury, lecz historyczna konwencja. **Odwrotna Mapa** zachęca do spojrzenia na świat z innej perspektywy — i to dosłownie — oraz przypomina, że sposób przedstawiania rzeczywistości znacząco wpływa na to, jak ją postrzegamy.
